@@ -1,5 +1,6 @@
-package starter
+package screep.memory
 
+import screep.roles.Role
 import screeps.api.*
 import screeps.utils.memory.memory
 

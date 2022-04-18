@@ -1,17 +1,19 @@
-package starter
+package screep.brain
 
 
+import screep.brain.repetative.RepetitiveTasks
+import screep.memory.numberOfCreeps
+import screep.memory.role
+import screep.roles.*
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
-import screeps.utils.isEmpty
-import screeps.utils.unsafe.delete
 import screeps.utils.unsafe.jsObject
 
 fun gameLoop() {
     val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
 
-    //delete memories of creeps that have passed away
-    houseKeeping(Game.creeps)
+    //create general repetitive tasks (like memory sweeping)
+    RepetitiveTasks.doTasks()
 
     // just an example of how to use room memory
     mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
@@ -30,30 +32,6 @@ fun gameLoop() {
             4 -> controller.room.createConstructionSite(25, 27, STRUCTURE_EXTENSION)
             5 -> controller.room.createConstructionSite(24, 27, STRUCTURE_EXTENSION)
             6 -> controller.room.createConstructionSite(23, 27, STRUCTURE_EXTENSION)
-        }
-    }
-
-    //spawn a big creep if we have plenty of energy
-    for ((_, room) in Game.rooms) {
-        if (room.energyAvailable >= 550) {
-            mainSpawn.spawnCreep(
-                    arrayOf(
-                            WORK,
-                            WORK,
-                            WORK,
-                            WORK,
-                            CARRY,
-                            MOVE,
-                            MOVE
-                    ),
-                    "HarvesterBig_${Game.time}",
-                    options {
-                        memory = jsObject<CreepMemory> {
-                            this.role = Role.HARVESTER
-                        }
-                    }
-            )
-            console.log("hurray!")
         }
     }
 
@@ -102,13 +80,3 @@ private fun spawnCreeps(
     }
 }
 
-private fun houseKeeping(creeps: Record<String, Creep>) {
-    if (Game.creeps.isEmpty()) return  // this is needed because Memory.creeps is undefined
-
-    for ((creepName, _) in Memory.creeps) {
-        if (creeps[creepName] == null) {
-            console.log("deleting obsolete memory entry for creep $creepName")
-            delete(Memory.creeps[creepName])
-        }
-    }
-}

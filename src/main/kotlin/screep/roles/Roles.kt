@@ -1,7 +1,10 @@
-package starter
+package screep.roles
 
 import screeps.api.*
 import screeps.api.structures.StructureController
+import screep.memory.building
+import screep.memory.pause
+import screep.memory.role
 
 
 enum class Role {
