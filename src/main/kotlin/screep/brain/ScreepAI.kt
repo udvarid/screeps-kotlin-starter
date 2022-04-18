@@ -1,6 +1,5 @@
 package screep.brain
 
-
 import screep.brain.repetative.RepetitiveTasks
 import screep.memory.numberOfCreeps
 import screep.memory.role
@@ -40,7 +39,7 @@ fun gameLoop() {
             Role.HARVESTER -> creep.harvest()
             Role.BUILDER -> creep.build()
             Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
-            else -> creep.pause()
+            else -> creep.assignRole()
         }
     }
 
