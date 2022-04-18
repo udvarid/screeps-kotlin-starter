@@ -21,8 +21,13 @@ fun Creep.upgrade(controller: StructureController) {
         }
     } else {
         val sources = room.find(FIND_SOURCES)
-        if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-            moveTo(sources[0].pos)
+            .filter { it.energy > 0 }
+            .toTypedArray()
+        val source = this.pos.findClosestByPath(sources)
+        if (source != null) {
+            if (harvest(source) == ERR_NOT_IN_RANGE) {
+                moveTo(source.pos)
+            }
         }
     }
 }
