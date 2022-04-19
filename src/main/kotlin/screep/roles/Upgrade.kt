@@ -20,14 +20,7 @@ fun Creep.upgrade(controller: StructureController) {
             moveTo(controller.pos)
         }
     } else {
-        val sources = room.find(FIND_SOURCES)
-            .filter { it.energy > 0 }
-            .toTypedArray()
-        val source = this.pos.findClosestByPath(sources)
-        if (source != null) {
-            if (harvest(source) == ERR_NOT_IN_RANGE) {
-                moveTo(source.pos)
-            }
-        }
+        val source = findFreeAndActiveSource(room)
+        goHarvest(source)
     }
 }

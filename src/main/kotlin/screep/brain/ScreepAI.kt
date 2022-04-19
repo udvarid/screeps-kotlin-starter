@@ -22,6 +22,25 @@ fun gameLoop() {
 
     // build a few extensions so we can have 550 energy
     val controller = mainSpawn.room.controller
+
+    /*
+    1, csak akkor nézzük, ha nincs construction site, előbb azt meg kell építeni
+    2, leszedjük a structure-öket
+    3, a mainSpawn-tól kezdve kifelé haladva rugó/csiga alakban minden egyes pontnál (jobb/bal nem üres legyen)
+        - plain vagy swamp
+        - nincs ott építményünk
+        - a spawn-tól oda lehessen találni, legyen út
+        - ne legyen a közelben Source vagy Mine
+     */
+
+    val terrain = mainSpawn.room.getTerrain()
+    when (terrain[mainSpawn.pos.x, mainSpawn.pos.y + 3]) {
+        TERRAIN_MASK_WALL -> console.log("This is wall")
+        TERRAIN_MASK_SWAMP -> console.log("This is swamp")
+        TERRAIN_MASK_LAVA -> console.log("This is lava")
+        else -> console.log("This is plain")
+    }
+
     if (controller != null && controller.level >= 2) {
         when (controller.room.find(FIND_MY_STRUCTURES).count { it.structureType == STRUCTURE_EXTENSION }) {
             0 -> controller.room.createConstructionSite(29, 27, STRUCTURE_EXTENSION)
