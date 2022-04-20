@@ -8,14 +8,13 @@ class RepetitiveTasks {
 
     companion object Tasks {
         fun doTasks() {
-            houseKeeping(Game.creeps)
+            memoryClearing(Game.creeps)
         }
     }
 
-
 }
 
-private fun houseKeeping(creeps: Record<String, Creep>) {
+private fun memoryClearing(creeps: Record<String, Creep>) {
     if (Game.creeps.isEmpty()) return  // this is needed because Memory.creeps is undefined
 
     for ((creepName, _) in Memory.creeps) {

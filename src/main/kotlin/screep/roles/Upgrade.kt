@@ -10,7 +10,7 @@ fun Creep.upgrade(controller: StructureController) {
         memory.working = false
         say("🔄 harvest")
     }
-    if (!memory.working && store[RESOURCE_ENERGY] == store.getCapacity()) {
+    if (!memory.working && store[RESOURCE_ENERGY] == store.getCapacity(RESOURCE_ENERGY)) {
         memory.working = true
         say("🚧 upgrading")
     }
