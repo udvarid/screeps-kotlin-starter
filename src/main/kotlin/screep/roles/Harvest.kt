@@ -16,6 +16,14 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
             if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 moveTo(targets[0].pos)
             }
+        } else {
+            val spawn = toRoom.find(FIND_MY_STRUCTURES)
+                .firstOrNull { (it.structureType == STRUCTURE_SPAWN) }
+            if (spawn != null) {
+                if (!spawn.pos.inRangeTo(this.pos,3)) {
+                    moveTo(spawn.pos)
+                }
+            }
         }
     }
 }
