@@ -28,7 +28,6 @@ var PowerCreepMemory.test : Int by memory { 0 }
 var FlagMemory.test : Int by memory { 0 }
 
 /* room.memory */
-var RoomMemory.numberOfCreeps : Int by memory { 0 }
 var RoomMemory.underAttack : Boolean by memory { false }
 
 /* spawn.memory */

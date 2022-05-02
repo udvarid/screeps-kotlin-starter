@@ -23,7 +23,7 @@ private fun detectingEnemies() {
         global.Memory.inspectCounter--
         return
     }
-    global.Memory.inspectCounter = 10
+    global.Memory.inspectCounter = 25
 
     val mainSpawns = Game.spawns.values
         .groupBy { it.room.name }
@@ -40,9 +40,9 @@ private fun detectingEnemies() {
 
 
 private fun memoryClearing(creeps: Record<String, Creep>) {
-    if (Game.creeps.isEmpty()) return  // this is needed because Memory.creeps is undefined
+    if (creeps.isEmpty()) return
 
-    for ((creepName, _) in Memory.creeps) {
+    for (creepName in Memory.creeps.keys) {
         if (creeps[creepName] == null) {
             console.log("deleting obsolete memory entry for creep $creepName")
             delete(Memory.creeps[creepName])

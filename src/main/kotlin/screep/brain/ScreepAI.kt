@@ -2,11 +2,12 @@ package screep.brain
 
 import screep.brain.repetative.RepetitiveTasks
 import screep.building.BuildingConstructor
-import screep.memory.numberOfCreeps
+import screep.building.doYourJobTower
 import screep.memory.role
 import screep.roles.*
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
+import screeps.api.structures.StructureTower
 import screeps.utils.unsafe.jsObject
 
 fun gameLoop() {
@@ -17,36 +18,44 @@ fun gameLoop() {
         .mapNotNull { it.value.firstOrNull() }
 
     for (mainSpawn in mainSpawns) {
-        // just an example of how to use room memory
-        mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
+        operateTowers(mainSpawn)
 
-        spawnCreeps(Game.creeps.values, mainSpawn)
+        spawnCreeps(mainSpawn)
 
         BuildingConstructor.doConstruct(mainSpawn)
 
-        for ((_, creep) in Game.creeps) {
-            when (creep.memory.role) {
-                Role.HARVESTER -> creep.harvest()
-                Role.BUILDER -> creep.build()
-                Role.REPAIRER -> creep.repair()
-                Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
-                else -> creep.assignRole()
-            }
-        }
+        giveWorkToCreeps()
     }
 
 }
 
-private fun spawnCreeps(
-        creeps: Array<Creep>,
-        spawn: StructureSpawn
-) {
+private fun operateTowers(mainSpawn: StructureSpawn) {
+    mainSpawn.room.find(FIND_MY_STRUCTURES)
+        .filter { it.structureType == STRUCTURE_TOWER }
+        .map { it.unsafeCast<StructureTower>() }
+        .forEach { it.doYourJobTower()}
+}
 
+private fun giveWorkToCreeps() {
+    for (creep in Game.creeps.values) {
+        when (creep.memory.role) {
+            Role.HARVESTER -> creep.harvest()
+            Role.BUILDER -> creep.build()
+            Role.REPAIRER -> creep.repair()
+            Role.UPGRADER -> creep.upgrade()
+            else -> creep.assignRole()
+        }
+    }
+}
+
+private fun spawnCreeps(spawn: StructureSpawn) {
     val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
 
     if (spawn.room.energyAvailable < body.sumOf { BODYPART_COST[it]!! }) {
         return
     }
+
+    val creeps = spawn.room.find(FIND_MY_CREEPS)
 
     val role: Role = when {
         creeps.count { it.memory.role == Role.HARVESTER } < 2 -> Role.HARVESTER
