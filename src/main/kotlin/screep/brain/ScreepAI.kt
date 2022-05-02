@@ -10,26 +10,27 @@ import screeps.api.structures.StructureSpawn
 import screeps.utils.unsafe.jsObject
 
 fun gameLoop() {
-    val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
-
-    //create general repetitive tasks (like memory sweeping)
     RepetitiveTasks.doTasks()
 
-    // just an example of how to use room memory
-    mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
+    val mainSpawns = Game.spawns.values
+        .groupBy { it.room.name }
+        .mapNotNull { it.value.firstOrNull() }
 
-    //make sure we have at least some creeps
-    spawnCreeps(Game.creeps.values, mainSpawn)
+    for (mainSpawn in mainSpawns) {
+        // just an example of how to use room memory
+        mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
 
-    // build a few extensions so we can have 550 energy
-    BuildingConstructor.doConstruct(mainSpawn)
+        spawnCreeps(Game.creeps.values, mainSpawn)
 
-    for ((_, creep) in Game.creeps) {
-        when (creep.memory.role) {
-            Role.HARVESTER -> creep.harvest()
-            Role.BUILDER -> creep.build()
-            Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
-            else -> creep.assignRole()
+        BuildingConstructor.doConstruct(mainSpawn)
+
+        for ((_, creep) in Game.creeps) {
+            when (creep.memory.role) {
+                Role.HARVESTER -> creep.harvest()
+                Role.BUILDER -> creep.build()
+                Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
+                else -> creep.assignRole()
+            }
         }
     }
 

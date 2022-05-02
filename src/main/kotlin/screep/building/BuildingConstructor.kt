@@ -8,7 +8,7 @@ import kotlin.math.abs
 class BuildingConstructor {
 
     companion object Construct {
-        private val buildingWithLimits: Map<BuildableStructureConstant, List<Pair<Int, Int>>> = fillUpBuildingLiWithmits()
+        private val buildingWithLimits: Map<BuildableStructureConstant, List<Pair<Int, Int>>> = fillUpBuildingLiWithLimits()
 
         fun doConstruct(spawn: StructureSpawn) {
             if (!isSpawnEligibleForConstructing(spawn)) {
@@ -103,9 +103,10 @@ private fun isSpawnEligibleForConstructing(spawn: StructureSpawn): Boolean =
             spawn.room.controller != null &&
             spawn.room.controller!!.level > 1
 
-private fun fillUpBuildingLiWithmits(): Map<BuildableStructureConstant, List<Pair<Int, Int>>> {
+private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<Pair<Int, Int>>> {
     val buildingLimits = mutableMapOf<BuildableStructureConstant, List<Pair<Int, Int>>>()
     buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5))
+    buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(3,10))
     return buildingLimits
 }
 
