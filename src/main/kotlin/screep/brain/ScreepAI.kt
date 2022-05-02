@@ -28,6 +28,7 @@ fun gameLoop() {
             when (creep.memory.role) {
                 Role.HARVESTER -> creep.harvest()
                 Role.BUILDER -> creep.build()
+                Role.REPAIRER -> creep.repair()
                 Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
                 else -> creep.assignRole()
             }
@@ -52,8 +53,11 @@ private fun spawnCreeps(
 
         creeps.none { it.memory.role == Role.UPGRADER } -> Role.UPGRADER
 
-        spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() &&
-                creeps.count { it.memory.role == Role.BUILDER } < 2 -> Role.BUILDER
+        creeps.count { it.memory.role == Role.BUILDER } < 2 &&
+                spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty()-> Role.BUILDER
+
+        creeps.count { it.memory.role == Role.REPAIRER } < 2 &&
+                spawn.room.find(FIND_MY_STRUCTURES).any { it.hits < it.hitsMax } -> Role.REPAIRER
 
         else -> return
     }

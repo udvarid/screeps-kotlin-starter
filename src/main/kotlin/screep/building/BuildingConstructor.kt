@@ -107,6 +107,7 @@ private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<P
     val buildingLimits = mutableMapOf<BuildableStructureConstant, List<Pair<Int, Int>>>()
     buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5))
     buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(3,10))
+    buildingLimits[STRUCTURE_TOWER] = listOf(Pair(3,1))
     return buildingLimits
 }
 

@@ -8,7 +8,9 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
         goHarvest(source)
     } else {
         val targets = toRoom.find(FIND_MY_STRUCTURES)
-            .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
+            .filter { (it.structureType == STRUCTURE_EXTENSION ||
+                    it.structureType == STRUCTURE_SPAWN ||
+                    it.structureType == STRUCTURE_TOWER) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
 

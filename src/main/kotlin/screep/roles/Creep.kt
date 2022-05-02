@@ -7,7 +7,8 @@ enum class Role {
     UNASSIGNED,
     HARVESTER,
     BUILDER,
-    UPGRADER
+    UPGRADER,
+    REPAIRER
 }
 
 fun Creep.assignRole() {
