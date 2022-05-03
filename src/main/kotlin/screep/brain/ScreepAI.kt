@@ -1,7 +1,6 @@
 package screep.brain
 
-import screep.brain.repetative.RepetitiveTasks
-import screep.building.BuildingConstructor
+import screep.brain.repetative.RepetitiveStrategyTasks
 import screep.building.doYourJobTower
 import screep.memory.role
 import screep.roles.*
@@ -11,21 +10,16 @@ import screeps.api.structures.StructureTower
 import screeps.utils.unsafe.jsObject
 
 fun gameLoop() {
-    RepetitiveTasks.doTasks()
+    val mainSpawns = getSpawns()
 
-    val mainSpawns = Game.spawns.values
-        .groupBy { it.room.name }
-        .mapNotNull { it.value.firstOrNull() }
+    RepetitiveStrategyTasks.doTasks(mainSpawns)
 
     for (mainSpawn in mainSpawns) {
         operateTowers(mainSpawn)
 
         spawnCreeps(mainSpawn)
-
-        BuildingConstructor.doConstruct(mainSpawn)
-
-        giveWorkToCreeps()
     }
+    giveWorkToCreeps()
 
 }
 
@@ -47,6 +41,12 @@ private fun giveWorkToCreeps() {
         }
     }
 }
+
+private fun getSpawns() : List<StructureSpawn> =
+    Game.spawns.values
+        .groupBy { it.room.name }
+        .mapNotNull { it.value.firstOrNull() }
+
 
 private fun spawnCreeps(spawn: StructureSpawn) {
     val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)

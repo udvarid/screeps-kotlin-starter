@@ -1,22 +1,28 @@
 package screep.roles
 
+import screep.memory.underAttack
 import screeps.api.*
+import screeps.api.structures.Structure
 
 fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
     if (store[RESOURCE_ENERGY] < store.getCapacity()) {
         val source = findFreeAndActiveSource(fromRoom)
         goHarvest(source)
     } else {
-        val targets = toRoom.find(FIND_MY_STRUCTURES)
-            .filter { (it.structureType == STRUCTURE_EXTENSION ||
-                    it.structureType == STRUCTURE_SPAWN ||
-                    it.structureType == STRUCTURE_TOWER) }
+        val target = toRoom.find(FIND_MY_STRUCTURES)
+            .filter { structuresRequiresEnergy.contains(it.structureType) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
+            .map { it.unsafeCast<Structure>() }
+            .map { Pair(getPriority(it.structureType, room), it) }
+            .sortedByDescending { it.first }
+            .map { it.second }
+            .map { it.unsafeCast<StoreOwner>() }
+            .firstOrNull()
 
-        if (targets.isNotEmpty()) {
-            if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                moveTo(targets[0].pos)
+        if (target != null) {
+            if (transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                moveTo(target.pos)
             }
         } else {
             val spawn = toRoom.find(FIND_MY_STRUCTURES)
@@ -29,4 +35,9 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
         }
     }
 }
+
+private fun getPriority(structureType: StructureConstant, room: Room): Int =
+    if (room.memory.underAttack && structureType == STRUCTURE_TOWER) 2 else 1
+
+
 

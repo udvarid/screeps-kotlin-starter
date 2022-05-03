@@ -35,4 +35,7 @@ fun Creep.goHarvest(source: Source?) {
     }
 }
 
+val structuresRequiresEnergy : List<StructureConstant> =
+    listOf(STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER)
+
 private fun Creep.canBeHarvester(): Boolean = getActiveBodyparts(WORK) > 0 && getActiveBodyparts(CARRY) > 0

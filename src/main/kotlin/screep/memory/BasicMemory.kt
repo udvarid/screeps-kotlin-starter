@@ -34,4 +34,5 @@ var RoomMemory.underAttack : Boolean by memory { false }
 var SpawnMemory.test : Int by memory { 0 }
 
 /* global.memory */
-var GlobalMemory.inspectCounter : Int by memory { 0 }
+var GlobalMemory.inspectCounterOfEnemyDetecting : Int by memory { 0 }
+var GlobalMemory.inspectCounterOfBuilding : Int by memory { 0 }
