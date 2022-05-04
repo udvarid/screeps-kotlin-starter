@@ -1,5 +1,6 @@
 package screep.memory
 
+import screep.roles.CreepState
 import screep.roles.Role
 import screeps.api.*
 import screeps.utils.memory.memory
@@ -12,6 +13,7 @@ import screeps.utils.memory.memory
 var CreepMemory.working: Boolean by memory { false }
 var CreepMemory.pause: Int by memory { 0 }
 var CreepMemory.role by memory(Role.UNASSIGNED)
+var CreepMemory.state by memory(CreepState.UNKNOWN)
 
 
 /* Rest of the persistent memory structures.

@@ -11,6 +11,17 @@ enum class Role {
     REPAIRER
 }
 
+enum class CreepState {
+    UNKNOWN,
+    IDLE,
+    TRANSFERRING_ENERGY,
+    HARVESTING,
+    UPGRADING,
+    REPAIRING,
+    BUILDING
+}
+
+
 fun Creep.assignRole() {
     if (canBeHarvester()) {
         memory.role = Role.HARVESTER
@@ -30,7 +41,7 @@ fun Creep.findFreeAndActiveSource(room: Room): Source? {
 fun Creep.goHarvest(source: Source?) {
     if (source != null) {
         if (harvest(source) == ERR_NOT_IN_RANGE) {
-            moveTo(source.pos)
+            moveTo(source.pos, options { reusePath = 10 })
         }
     }
 }

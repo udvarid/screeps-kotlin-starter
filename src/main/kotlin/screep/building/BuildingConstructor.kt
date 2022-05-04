@@ -1,5 +1,6 @@
 package screep.building
 
+import screep.memory.underAttack
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import kotlin.math.abs
@@ -11,7 +12,7 @@ class BuildingConstructor {
         private val buildingWithLimits: Map<BuildableStructureConstant, List<Pair<Int, Int>>> = fillUpBuildingLiWithLimits()
 
         fun doConstruct(spawn: StructureSpawn) {
-            if (!isSpawnEligibleForConstructing(spawn)) {
+            if (spawn.room.memory.underAttack || !isSpawnEligibleForConstructing(spawn)) {
                 return
             }
             val controllerLevel = spawn.room.controller!!.level

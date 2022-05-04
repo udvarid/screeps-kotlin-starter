@@ -1,5 +1,7 @@
 package screep.roles
 
+import screep.building.getMainSpawn
+import screep.memory.state
 import screep.memory.underAttack
 import screeps.api.*
 import screeps.api.structures.Structure
@@ -7,6 +9,7 @@ import screeps.api.structures.Structure
 fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
     if (store[RESOURCE_ENERGY] < store.getCapacity()) {
         val source = findFreeAndActiveSource(fromRoom)
+        memory.state = CreepState.HARVESTING
         goHarvest(source)
     } else {
         val target = toRoom.find(FIND_MY_STRUCTURES)
@@ -21,15 +24,16 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
             .firstOrNull()
 
         if (target != null) {
+            memory.state = CreepState.TRANSFERRING_ENERGY
             if (transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                moveTo(target.pos)
+                moveTo(target.pos, options { reusePath = 10 })
             }
         } else {
-            val spawn = toRoom.find(FIND_MY_STRUCTURES)
-                .firstOrNull { (it.structureType == STRUCTURE_SPAWN) }
+            memory.state = CreepState.IDLE
+            val spawn = toRoom.getMainSpawn()
             if (spawn != null) {
                 if (!spawn.pos.inRangeTo(this.pos,3)) {
-                    moveTo(spawn.pos)
+                    moveTo(spawn.pos, options { reusePath = 10 })
                 }
             }
         }
