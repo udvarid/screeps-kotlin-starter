@@ -1,6 +1,7 @@
 package screep.roles
 
 import screep.building.getMainSpawn
+import screep.building.getMyStructures
 import screep.memory.state
 import screep.memory.underAttack
 import screeps.api.*
@@ -12,7 +13,7 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
         memory.state = CreepState.HARVESTING
         goHarvest(source)
     } else {
-        val target = toRoom.find(FIND_MY_STRUCTURES)
+        val target = toRoom.getMyStructures()
             .filter { structuresRequiresEnergy.contains(it.structureType) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }

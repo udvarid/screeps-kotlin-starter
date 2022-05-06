@@ -2,8 +2,10 @@
 package screep.brain.repetative
 
 import screep.building.BuildingConstructor
-import screep.constant.buildingPlanningLimit
+import screep.building.getDamagedBuildings
+import screep.constant.constructionRelatedLimit
 import screep.constant.enemyDetectorLimit
+import screep.memory.hasDamagedBuilding
 import screep.memory.inspectCounterOfBuilding
 import screep.memory.inspectCounterOfEnemyDetecting
 import screep.memory.underAttack
@@ -18,21 +20,24 @@ class RepetitiveStrategyTasks {
         fun doTasks(spawns: List<StructureSpawn>) {
             memoryClearing(Game.creeps)
             detectingEnemies(spawns)
-            planBuilding(spawns)
+            doConstructionRelatedJobs(spawns)
         }
     }
 }
 
-private fun planBuilding(spawns: List<StructureSpawn>) {
+private fun doConstructionRelatedJobs(spawns: List<StructureSpawn>) {
 
     if (global.Memory.inspectCounterOfBuilding > 0) {
         global.Memory.inspectCounterOfBuilding--
         return
     }
-    global.Memory.inspectCounterOfBuilding = buildingPlanningLimit
+    global.Memory.inspectCounterOfBuilding = constructionRelatedLimit
 
     for (spawn in spawns) {
         BuildingConstructor.doConstruct(spawn)
+        with(spawn.room) {
+            memory.hasDamagedBuilding = getDamagedBuildings().isNotEmpty()
+        }
     }
 }
 

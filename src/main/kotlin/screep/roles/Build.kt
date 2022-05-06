@@ -1,5 +1,6 @@
 package screep.roles
 
+import screep.building.getMyConstructionSites
 import screep.memory.role
 import screep.memory.state
 import screep.memory.working
@@ -18,7 +19,7 @@ fun Creep.build(assignedRoom: Room = this.room) {
     }
 
     if (memory.working) {
-        val targets = assignedRoom.find(FIND_MY_CONSTRUCTION_SITES)
+        val targets = assignedRoom.getMyConstructionSites()
         if (targets.isNotEmpty()) {
             if (build(targets[0]) == ERR_NOT_IN_RANGE) {
                 moveTo(targets[0].pos, options { reusePath = 10 })

@@ -1,5 +1,8 @@
 package screep.roles
 
+import screep.building.getDamagedBuildings
+import screep.building.getDamagedCreeps
+import screep.building.getMyStructures
 import screep.memory.role
 import screep.memory.state
 import screep.memory.working
@@ -18,8 +21,7 @@ fun Creep.repair(assignedRoom: Room = this.room) {
     }
 
     if (memory.working) {
-        val targets = assignedRoom.find(FIND_MY_STRUCTURES)
-            .filter { it.hits < it.hitsMax }
+        val targets = assignedRoom.getDamagedBuildings()
         if (targets.isNotEmpty()) {
             if (repair(targets[0]) == ERR_NOT_IN_RANGE) {
                 moveTo(targets[0].pos, options { reusePath = 10 })

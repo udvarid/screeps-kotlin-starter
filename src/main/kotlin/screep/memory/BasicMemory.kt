@@ -31,6 +31,7 @@ var FlagMemory.test : Int by memory { 0 }
 
 /* room.memory */
 var RoomMemory.underAttack : Boolean by memory { false }
+var RoomMemory.hasDamagedBuilding : Boolean by memory { false }
 
 /* spawn.memory */
 var SpawnMemory.test : Int by memory { 0 }

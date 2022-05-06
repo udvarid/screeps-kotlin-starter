@@ -2,11 +2,16 @@
 package screep.brain.repetative
 
 import screep.building.doYourJobTower
+import screep.building.getMyConstructionSites
+import screep.building.getMyCreeps
+import screep.building.getTowers
+import screep.memory.hasDamagedBuilding
 import screep.memory.role
 import screep.roles.*
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import screeps.api.structures.StructureTower
+import screeps.utils.lazyPerTick
 import screeps.utils.unsafe.jsObject
 
 class RepetitiveOperationTasks {
@@ -14,16 +19,28 @@ class RepetitiveOperationTasks {
     companion object Tasks {
         fun doTasks(spawns: List<StructureSpawn>) {
             operateTowers(spawns)
+            reOrganiseUpgradersWhenNecessary(spawns)
             spawnCreeps(spawns)
             giveWorkToCreeps()
+        }
+
+    }
+}
+private fun reOrganiseUpgradersWhenNecessary(spawns: List<StructureSpawn>) {
+    for (spawn in spawns) {
+        val creeps = spawn.room.getMyCreeps()
+        val upgraders = creeps.filter { it.memory.role == Role.UPGRADER }
+        val builders by lazy { creeps.filter { it.memory.role == Role.BUILDER } }
+        if (upgraders.size > 1 && builders.size < 2 && spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty()) {
+            upgraders.maxByOrNull { it.ticksToLive }!!.memory.role = Role.BUILDER
         }
     }
 }
 
 private fun operateTowers(spawns: List<StructureSpawn>) {
     for (spawn in spawns) {
-        spawn.room.find(FIND_MY_STRUCTURES)
-            .filter { it.structureType == STRUCTURE_TOWER }
+        spawn.room
+            .getTowers()
             .map { it.unsafeCast<StructureTower>() }
             .forEach { it.doYourJobTower()}
     }
@@ -50,7 +67,7 @@ private fun spawnCreeps(spawns: List<StructureSpawn>) {
             return
         }
 
-        val creeps = spawn.room.find(FIND_MY_CREEPS)
+        val creeps = spawn.room.getMyCreeps()
 
         val role: Role = when {
             creeps.count { it.memory.role == Role.HARVESTER } < 2 -> Role.HARVESTER
@@ -58,10 +75,11 @@ private fun spawnCreeps(spawns: List<StructureSpawn>) {
             creeps.none { it.memory.role == Role.UPGRADER } -> Role.UPGRADER
 
             creeps.count { it.memory.role == Role.BUILDER } < 2 &&
-                    spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty()-> Role.BUILDER
+                    spawn.room.getMyConstructionSites().isNotEmpty()-> Role.BUILDER
 
-            creeps.count { it.memory.role == Role.REPAIRER } < 2 &&
-                    spawn.room.find(FIND_MY_STRUCTURES).any { it.hits < it.hitsMax } -> Role.REPAIRER
+            spawn.room.getTowers().isNotEmpty() &&
+                    creeps.count { it.memory.role == Role.REPAIRER } < 1 &&
+                    spawn.room.memory.hasDamagedBuilding -> Role.REPAIRER
 
             else -> return
         }
