@@ -37,7 +37,6 @@ fun Creep.findFreeAndActiveSource(room: Room): Source? {
     return pos.findClosestByPath(sources)
 }
 
-
 fun Creep.goHarvest(source: Source) {
     if (harvest(source) == ERR_NOT_IN_RANGE) {
         moveTo(source.pos, options { reusePath = 10 })

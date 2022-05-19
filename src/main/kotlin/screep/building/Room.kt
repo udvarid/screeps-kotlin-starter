@@ -21,11 +21,8 @@ fun Room.getDamagedCreeps() = getMyCreeps()
     .filter { it.hits < it.hitsMax }
 
 fun Room.storageWithEnergy(): StoreOwner? {
-    val myStore = storage?.unsafeCast<Store>()
-    return if (myStore != null && myStore[RESOURCE_ENERGY] > 0) {
-        myStore.unsafeCast<StoreOwner>()
-    } else {
-        null
+    return storage?.let {
+        if (it.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY] > 0) it else null
     }
 }
 

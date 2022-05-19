@@ -21,15 +21,15 @@ fun StructureTower.doYourJobTower() {
             .filterNot { structureNotToRepair.contains(it.structureType)}
             .maxByOrNull { it.hitsMax - it.hits }
             ?.let { repair(it)  }
-    } else if (ableToRepair() && room.getMyRamparts().isNotEmpty()) {
+    } else if (ableToRepair()) {
         val rampartToBuild = room.getMyRamparts().firstOrNull { it.hits < rampartLimit() }
         rampartToBuild?.let { repair(it) }
     }
 }
 
 fun StructureTower.ableToRepair() : Boolean {
-    val tower = this.unsafeCast<Store>()
-    return tower[RESOURCE_ENERGY] > tower.getCapacity(RESOURCE_ENERGY)?.div(2)
+    val tower = this.unsafeCast<StoreOwner>()
+    return tower.store[RESOURCE_ENERGY] > tower.store.getCapacity(RESOURCE_ENERGY)?.div(2)
 }
 
 fun StructureTower.rampartLimit() : Int {

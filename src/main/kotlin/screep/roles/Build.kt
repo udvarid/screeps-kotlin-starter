@@ -20,10 +20,10 @@ fun Creep.build(assignedRoom: Room = this.room) {
     }
 
     if (memory.working) {
-        val targets = assignedRoom.getMyConstructionSites()
-        if (targets.isNotEmpty()) {
-            if (build(targets[0]) == ERR_NOT_IN_RANGE) {
-                moveTo(targets[0].pos, options { reusePath = 10 })
+        val target = assignedRoom.getMyConstructionSites().firstOrNull()
+        if (target != null) {
+            if (build(target) == ERR_NOT_IN_RANGE) {
+                moveTo(target.pos, options { reusePath = 10 })
             }
         } else {
             memory.role = Role.UPGRADER

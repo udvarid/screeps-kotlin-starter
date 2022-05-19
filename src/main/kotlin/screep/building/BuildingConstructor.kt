@@ -22,8 +22,8 @@ class BuildingConstructor {
                     val listOfPairs = entry.value.filter { it.first <= controllerLevel }.sortedByDescending { it.first }
                     val numberOfBuilding = if (listOfPairs.isNotEmpty()) listOfPairs[0].second else 0
 
-                    if (spawn.room.find(FIND_MY_STRUCTURES).count { it.structureType == buildingType } < numberOfBuilding) {
-                        createConstruction(spawn, buildingType)
+                    if (spawn.room.getMyStructures().count { it.structureType == buildingType } < numberOfBuilding) {
+                        createConstructionSite(spawn, buildingType)
                         return
                     }
                 }
@@ -38,20 +38,18 @@ class BuildingConstructor {
     }
 }
 
-private fun createConstruction(spawn: StructureSpawn, buildingType: BuildableStructureConstant) {
-    val coordinate: Coordinate? = getFreeBuildingSite(spawn)
-    if (coordinate!= null) {
-        spawn.room.createConstructionSite(coordinate.x, coordinate.y, buildingType)
+private fun createConstructionSite(spawn: StructureSpawn, buildingType: BuildableStructureConstant) {
+    getFreeBuildingSite(spawn)?.let {
+        spawn.room.createConstructionSite(it.x, it.y, buildingType)
     }
 }
 
 private fun getFreeBuildingSite(spawn: StructureSpawn): Coordinate? {
-    val structures = spawn.room.find(FIND_MY_STRUCTURES)
+    val structures = spawn.room.getMyStructures()
     val terrain = spawn.room.getTerrain()
     val coordinateQueue = mutableListOf(Coordinate(spawn.pos.x, spawn.pos.y))
     var finalCoordinate: Coordinate? = null
-    while (finalCoordinate ==
-        null && coordinateQueue.isNotEmpty()) {
+    while (finalCoordinate == null && coordinateQueue.isNotEmpty()) {
         val coordinate = coordinateQueue.removeAt(0)
         coordinate.getNeighbours()
             .filter { it.inNormalRange()}
@@ -106,7 +104,7 @@ fun isNearToSource(coordinate: Coordinate, room: Room): Boolean {
 
 
 private fun isSpawnEligibleForConstructing(spawn: StructureSpawn): Boolean =
-            spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isEmpty() &&
+            spawn.room.getMyConstructionSites().isEmpty() &&
             spawn.room.controller != null &&
             spawn.room.controller!!.level > 1
 

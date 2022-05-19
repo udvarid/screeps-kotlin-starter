@@ -19,9 +19,10 @@ fun Creep.upgrade() {
     }
 
     if (memory.working) {
-        val controller = this.room.controller
-        if (controller != null && upgradeController(controller) == ERR_NOT_IN_RANGE) {
-            moveTo(controller.pos, options { reusePath = 10 })
+        this.room.controller?.let {
+            if (upgradeController(it) == ERR_NOT_IN_RANGE) {
+                moveTo(it.pos, options { reusePath = 10 })
+            }
         }
     } else {
         val store = room.storageWithEnergy()
