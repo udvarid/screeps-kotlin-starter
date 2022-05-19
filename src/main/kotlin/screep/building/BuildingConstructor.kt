@@ -27,6 +27,12 @@ class BuildingConstructor {
                         return
                     }
                 }
+            val structureNeedsRampart = spawn.room.getMyStructuresToCoverWithRampart()
+                .filterNot { it.hasRampart() }
+                .firstOrNull()
+            structureNeedsRampart?.let {
+                spawn.room.createConstructionSite(it.pos, STRUCTURE_RAMPART)
+            }
         }
 
     }

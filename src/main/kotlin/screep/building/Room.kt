@@ -22,10 +22,18 @@ fun Room.getDamagedCreeps() = getMyCreeps()
 
 fun Room.storageWithEnergy(): StoreOwner? {
     val myStore = storage?.unsafeCast<Store>()
-    return if (myStore != null && myStore.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+    return if (myStore != null && myStore[RESOURCE_ENERGY] > 0) {
         myStore.unsafeCast<StoreOwner>()
     } else {
         null
     }
 }
+
+val structureTypesToDefend = listOf(STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE)
+
+fun Room.getMyStructuresToCoverWithRampart() = getMyStructures()
+        .filter { structureTypesToDefend.contains(it.structureType) }
+
+fun Room.getMyRamparts() = getMyStructures()
+        .filter { it.structureType == STRUCTURE_RAMPART }
 

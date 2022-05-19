@@ -16,13 +16,32 @@ fun StructureTower.doYourJobTower() {
                 .maxByOrNull { it.hitsMax - it.hits }
                 ?.let { heal(it) }
         }
-    } else if (room.memory.hasDamagedBuilding) {
+    } else if (ableToRepair() && room.memory.hasDamagedBuilding) {
         room.getDamagedBuildings()
             .filterNot { structureNotToRepair.contains(it.structureType)}
             .maxByOrNull { it.hitsMax - it.hits }
             ?.let { repair(it)  }
+    } else if (ableToRepair() && room.getMyRamparts().isNotEmpty()) {
+        val rampartToBuild = room.getMyRamparts().firstOrNull { it.hits < rampartLimit() }
+        rampartToBuild?.let { repair(it) }
     }
-
-
 }
 
+fun StructureTower.ableToRepair() : Boolean {
+    val tower = this.unsafeCast<Store>()
+    return tower[RESOURCE_ENERGY] > tower.getCapacity(RESOURCE_ENERGY)?.div(2)
+}
+
+fun StructureTower.rampartLimit() : Int {
+    val controller = room.controller
+    return controller?.let {
+        when (it.level) {
+            1, 2, 3, 4 -> 100_000
+            5 -> 200_000
+            6 -> 300_000
+            7 -> 500_000
+            8 -> 1_000_000
+            else -> 0
+        }
+    }  ?: 0
+}
