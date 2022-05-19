@@ -11,14 +11,14 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
     if (store[RESOURCE_ENERGY] < store.getCapacity()) {
         val source = findFreeAndActiveSource(fromRoom)
         memory.state = CreepState.HARVESTING
-        goHarvest(source)
+        source?.let { goHarvest(it) }
     } else {
         val target = toRoom.getMyStructures()
             .filter { structuresRequiresEnergy.contains(it.structureType) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
             .map { it.unsafeCast<Structure>() }
-            .map { Pair(getPriority(it.structureType, room), it) }
+            .map { Pair(getEnergyFillPriority(it.structureType, room), it) }
             .sortedByDescending { it.first }
             .map { it.second }
             .map { it.unsafeCast<StoreOwner>() }
@@ -41,8 +41,12 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
     }
 }
 
-private fun getPriority(structureType: StructureConstant, room: Room): Int =
-    if (room.memory.underAttack && structureType == STRUCTURE_TOWER) 2 else 1
+private fun getEnergyFillPriority(structureType: StructureConstant, room: Room): Int =
+    when (structureType) {
+        STRUCTURE_TOWER -> if (room.memory.underAttack) 3 else 2
+        STRUCTURE_SPAWN, STRUCTURE_EXTENSION -> 2
+        else -> 1
+    }
 
 
 

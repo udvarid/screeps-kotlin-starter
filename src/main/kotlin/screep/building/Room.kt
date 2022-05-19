@@ -19,3 +19,13 @@ fun Room.getDamagedBuildings() = getMyStructures()
 
 fun Room.getDamagedCreeps() = getMyCreeps()
     .filter { it.hits < it.hitsMax }
+
+fun Room.storageWithEnergy(): StoreOwner? {
+    val myStore = storage?.unsafeCast<Store>()
+    return if (myStore != null && myStore.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+        myStore.unsafeCast<StoreOwner>()
+    } else {
+        null
+    }
+}
+

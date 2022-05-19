@@ -1,5 +1,6 @@
 package screep.roles
 
+import screep.building.storageWithEnergy
 import screep.memory.state
 import screep.memory.working
 import screeps.api.*
@@ -23,7 +24,12 @@ fun Creep.upgrade() {
             moveTo(controller.pos, options { reusePath = 10 })
         }
     } else {
-        val source = findFreeAndActiveSource(room)
-        goHarvest(source)
+        val store = room.storageWithEnergy()
+        if (store != null) {
+            goWithdraw(store)
+        } else {
+            val source = findFreeAndActiveSource(room)
+            source?.let { goHarvest(it) }
+        }
     }
 }

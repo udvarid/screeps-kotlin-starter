@@ -3,6 +3,7 @@ package screep.roles
 import screep.building.getDamagedBuildings
 import screep.building.getDamagedCreeps
 import screep.building.getMyStructures
+import screep.building.storageWithEnergy
 import screep.memory.role
 import screep.memory.state
 import screep.memory.working
@@ -30,7 +31,12 @@ fun Creep.repair(assignedRoom: Room = this.room) {
             memory.role = Role.UPGRADER
         }
     } else {
-        val source = findFreeAndActiveSource(room)
-        goHarvest(source)
+        val store = room.storageWithEnergy()
+        if (store != null) {
+            goWithdraw(store)
+        } else {
+            val source = findFreeAndActiveSource(room)
+            source?.let { goHarvest(it) }
+        }
     }
 }
