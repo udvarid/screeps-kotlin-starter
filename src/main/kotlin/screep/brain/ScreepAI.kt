@@ -3,13 +3,15 @@ package screep.brain
 import screep.brain.repetative.RepetitiveOperationTasks
 import screep.brain.repetative.RepetitiveStrategyTasks
 import screep.building.getMainSpawns
+import screep.context.RoomContext
 import screeps.api.*
 
 fun gameLoop() {
-    val mainSpawns = Game.getMainSpawns()
+    val roomContexts = Game.getMainSpawns()
+        .map { RoomContext(it.room, it) }
 
-    RepetitiveStrategyTasks.doTasks(mainSpawns)
+    RepetitiveStrategyTasks.doTasks(roomContexts)
 
-    RepetitiveOperationTasks.doTasks(mainSpawns)
+    RepetitiveOperationTasks.doTasks(roomContexts)
 }
 

@@ -1,13 +1,13 @@
 package screep.roles
 
-import screep.building.getMyConstructionSites
 import screep.building.storageWithEnergy
+import screep.context.RoomContext
 import screep.memory.role
 import screep.memory.state
 import screep.memory.working
 import screeps.api.*
 
-fun Creep.build(assignedRoom: Room = this.room) {
+fun Creep.buildMe(roomContext: RoomContext?) {
     if (memory.working && store[RESOURCE_ENERGY] == 0) {
         memory.working = false
         say("🔄 harvest")
@@ -20,7 +20,7 @@ fun Creep.build(assignedRoom: Room = this.room) {
     }
 
     if (memory.working) {
-        val target = assignedRoom.getMyConstructionSites().firstOrNull()
+        val target = roomContext!!.myConstructionSites.firstOrNull()
         if (target != null) {
             if (build(target) == ERR_NOT_IN_RANGE) {
                 moveTo(target.pos, options { reusePath = 10 })
@@ -33,7 +33,7 @@ fun Creep.build(assignedRoom: Room = this.room) {
         if (store != null) {
             goWithdraw(store)
         } else {
-            val source = findFreeAndActiveSource(room)
+            val source = findFreeAndActiveSource(roomContext!!.mySources)
             source?.let { goHarvest(it) }
         }
     }

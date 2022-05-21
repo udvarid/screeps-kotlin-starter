@@ -1,28 +1,29 @@
 package screep.building
 
+import screep.context.RoomContext
 import screep.memory.hasDamagedBuilding
 import screep.memory.underAttack
+import screep.roles.structureNotToRepair
 import screeps.api.*
 import screeps.api.structures.StructureTower
 
-fun StructureTower.doYourJobTower() {
-    val structureNotToRepair = listOf(STRUCTURE_ROAD, STRUCTURE_WALL, STRUCTURE_RAMPART)
+fun StructureTower.doYourJobTower(roomContext: RoomContext) {
     if (room.memory.underAttack) {
         val enemy = pos.findClosestByRange(FIND_HOSTILE_CREEPS)
         if (enemy != null) {
             attack(enemy)
         } else {
-            room.getDamagedCreeps()
+            roomContext.damagedCreeps
                 .maxByOrNull { it.hitsMax - it.hits }
                 ?.let { heal(it) }
         }
     } else if (ableToRepair() && room.memory.hasDamagedBuilding) {
-        room.getDamagedBuildings()
+        roomContext.damagedBuildings
             .filterNot { structureNotToRepair.contains(it.structureType)}
             .maxByOrNull { it.hitsMax - it.hits }
             ?.let { repair(it)  }
     } else if (ableToRepair()) {
-        val rampartToBuild = room.getMyRamparts().firstOrNull { it.hits < rampartLimit() }
+        val rampartToBuild = roomContext.myRamparts.firstOrNull { it.hits < rampartLimit() }
         rampartToBuild?.let { repair(it) }
     }
 }

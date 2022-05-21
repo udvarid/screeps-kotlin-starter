@@ -21,6 +21,8 @@ enum class CreepState {
     BUILDING
 }
 
+val structureNotToRepair = listOf(STRUCTURE_ROAD, STRUCTURE_WALL, STRUCTURE_RAMPART)
+
 
 fun Creep.assignRole() {
     if (canBeHarvester()) {
@@ -30,11 +32,10 @@ fun Creep.assignRole() {
     }
 }
 
-fun Creep.findFreeAndActiveSource(room: Room): Source? {
-    val sources = room.find(FIND_SOURCES)
+fun Creep.findFreeAndActiveSource(sources: Array<Source>): Source? {
+    return pos.findClosestByPath(sources
         .filter { it.energy > 0 }
-        .toTypedArray()
-    return pos.findClosestByPath(sources)
+        .toTypedArray())
 }
 
 fun Creep.goHarvest(source: Source) {

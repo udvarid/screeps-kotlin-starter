@@ -1,11 +1,12 @@
 package screep.roles
 
 import screep.building.storageWithEnergy
+import screep.context.RoomContext
 import screep.memory.state
 import screep.memory.working
 import screeps.api.*
 
-fun Creep.upgrade() {
+fun Creep.upgradeMe(roomContext: RoomContext?) {
 
     if (memory.working && store[RESOURCE_ENERGY] == 0) {
         memory.working = false
@@ -29,7 +30,7 @@ fun Creep.upgrade() {
         if (store != null) {
             goWithdraw(store)
         } else {
-            val source = findFreeAndActiveSource(room)
+            val source = findFreeAndActiveSource(roomContext!!.mySources)
             source?.let { goHarvest(it) }
         }
     }

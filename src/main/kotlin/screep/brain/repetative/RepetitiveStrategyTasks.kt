@@ -2,30 +2,30 @@
 package screep.brain.repetative
 
 import screep.building.BuildingConstructor
-import screep.building.getDamagedBuildings
 import screep.constant.constructionRelatedLimit
 import screep.constant.enemyDetectorLimit
+import screep.context.RoomContext
 import screep.memory.hasDamagedBuilding
 import screep.memory.inspectCounterOfBuilding
 import screep.memory.inspectCounterOfEnemyDetecting
 import screep.memory.underAttack
+import screep.roles.structureNotToRepair
 import screeps.api.*
-import screeps.api.structures.StructureSpawn
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
 
 class RepetitiveStrategyTasks {
 
     companion object Tasks {
-        fun doTasks(spawns: List<StructureSpawn>) {
+        fun doTasks(roomContexts: List<RoomContext>) {
             memoryClearing(Game.creeps)
-            detectingEnemies(spawns)
-            doConstructionRelatedJobs(spawns)
+            detectingEnemies(roomContexts)
+            doConstructionRelatedJobs(roomContexts)
         }
     }
 }
 
-private fun doConstructionRelatedJobs(spawns: List<StructureSpawn>) {
+private fun doConstructionRelatedJobs(roomContexts: List<RoomContext>) {
 
     if (global.Memory.inspectCounterOfBuilding > 0) {
         global.Memory.inspectCounterOfBuilding--
@@ -33,15 +33,17 @@ private fun doConstructionRelatedJobs(spawns: List<StructureSpawn>) {
     }
     global.Memory.inspectCounterOfBuilding = constructionRelatedLimit
 
-    for (spawn in spawns) {
-        BuildingConstructor.doConstruct(spawn)
-        with(spawn.room) {
-            memory.hasDamagedBuilding = getDamagedBuildings().isNotEmpty()
+    for (roomContext in roomContexts) {
+        BuildingConstructor.doConstruct(roomContext)
+        with(roomContext.room) {
+            memory.hasDamagedBuilding = roomContext.damagedBuildings
+                .filterNot { structureNotToRepair.contains(it.structureType) }
+                .isNotEmpty()
         }
     }
 }
 
-private fun detectingEnemies(spawns: List<StructureSpawn>) {
+private fun detectingEnemies(roomContexts: List<RoomContext>) {
 
     if (global.Memory.inspectCounterOfEnemyDetecting > 0) {
         global.Memory.inspectCounterOfEnemyDetecting--
@@ -49,11 +51,11 @@ private fun detectingEnemies(spawns: List<StructureSpawn>) {
     }
     global.Memory.inspectCounterOfEnemyDetecting = enemyDetectorLimit
 
-    for (spawn in spawns) {
-        val enemyScreeps = spawn.room.find(FIND_HOSTILE_CREEPS).count()
-        spawn.room.memory.underAttack = enemyScreeps > 0
-        if (spawn.room.memory.underAttack) {
-            console.log("Room ", spawn.room.name, " is under attack!")
+    for (roomContext in roomContexts) {
+        val enemyScreeps = roomContext.enemyCreeps.count()
+        roomContext.room.memory.underAttack = enemyScreeps > 0
+        if (roomContext.room.memory.underAttack) {
+            console.log("Room ", roomContext.room.name, " is under attack!")
         }
     }
 }
