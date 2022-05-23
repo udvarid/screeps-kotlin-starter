@@ -23,7 +23,9 @@ fun StructureTower.doYourJobTower(roomContext: RoomContext) {
             .maxByOrNull { it.hitsMax - it.hits }
             ?.let { repair(it)  }
     } else if (ableToRepair()) {
-        val rampartToBuild = roomContext.myRamparts.firstOrNull { it.hits < rampartLimit() }
+        val rampartToBuild = roomContext.myRamparts
+            .filter { it.hits < rampartLimit() }
+            .minByOrNull { it.hits }
         rampartToBuild?.let { repair(it) }
     }
 }

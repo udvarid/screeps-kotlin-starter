@@ -3,12 +3,12 @@ package screep.brain.repetative
 
 import screep.building.doYourJobTower
 import screep.context.RoomContext
-import screep.memory.hasDamagedBuilding
 import screep.memory.role
 import screep.roles.*
 import screeps.api.*
 import screeps.api.structures.StructureTower
 import screeps.utils.unsafe.jsObject
+import kotlin.math.min
 
 class RepetitiveOperationTasks {
 
@@ -59,32 +59,46 @@ private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
 }
 
 private fun spawnCreeps(roomContext: RoomContext) {
-    val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
+    val creeps = roomContext.myCreeps
 
-    if (roomContext.room.energyAvailable < body.sumOf { BODYPART_COST[it]!! }) {
+    var role: Role? = null
+    for (creepPlan in creepPlans) {
+        if (roomContext.room.energyAvailable < creepPlan.body.sumOf { BODYPART_COST[it]!! }) {
+            continue
+        }
+        val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
+        val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
+        if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
+            role = creepPlan.role
+            break
+        }
+    }
+
+    if (role == null) {
         return
     }
 
-    val creeps = roomContext.myCreeps
-
-    val role: Role = when {
-        creeps.count { it.memory.role == Role.HARVESTER } < 2 -> Role.HARVESTER
-
-        creeps.none { it.memory.role == Role.UPGRADER } -> Role.UPGRADER
-
-        creeps.count { it.memory.role == Role.BUILDER } < 2 &&
-                roomContext.myConstructionSites.isNotEmpty()-> Role.BUILDER
-
-        roomContext.myTowers.isNotEmpty() &&
-                creeps.count { it.memory.role == Role.REPAIRER } < 1 &&
-                roomContext.room.memory.hasDamagedBuilding -> Role.REPAIRER
-
-        else -> return
+    val finalPlan = creepPlans.first {it.role == role}
+    val minimumCost = finalPlan.body.sumOf { BODYPART_COST[it]!! }
+    val multiplicator = min(roomContext.room.energyCapacityAvailable / minimumCost, finalPlan.max)
+    val finalCost = minimumCost * multiplicator
+    var body: Array<BodyPartConstant> = finalPlan.body.copyOf()
+    if (finalPlan.role == Role.HARVESTER && creeps.count { it.memory.role == finalPlan.role } == 0 ) {
+        val minMultiplicator = min(roomContext.room.energyAvailable / minimumCost, finalPlan.max)
+        for (i in 1 until minMultiplicator) {
+            body += finalPlan.body
+        }
+    } else if (roomContext.room.energyAvailable < finalCost) {
+        return
+    } else {
+        for (i in 1 until multiplicator) {
+            body += finalPlan.body
+        }
     }
 
     val newName = "${role.name}_${Game.time}"
     val code = roomContext.spawn!!.spawnCreep(body, newName, options {
-        memory = jsObject<CreepMemory> { this.role = role }
+        memory = jsObject<CreepMemory> { this.role = this.role }
     })
 
     when (code) {
