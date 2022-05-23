@@ -7,7 +7,8 @@ import screeps.api.*
 import screeps.api.structures.Structure
 
 fun Creep.harvestMe(roomContext: RoomContext?) {
-    if (store[RESOURCE_ENERGY] < store.getCapacity()) {
+    if (store[RESOURCE_ENERGY] < store.getCapacity() && memory.state == CreepState.HARVESTING ||
+        store[RESOURCE_ENERGY] == 0) {
         val source = findFreeAndActiveSource(roomContext!!.mySources)
         memory.state = CreepState.HARVESTING
         source?.let { goHarvest(it) }

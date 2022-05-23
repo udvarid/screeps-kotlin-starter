@@ -61,28 +61,13 @@ private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
 private fun spawnCreeps(roomContext: RoomContext) {
     val creeps = roomContext.myCreeps
 
-    var role: Role? = null
-    for (creepPlan in creepPlans) {
-        if (roomContext.room.energyAvailable < creepPlan.body.sumOf { BODYPART_COST[it]!! }) {
-            continue
-        }
-        val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
-        val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
-        if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
-            role = creepPlan.role
-            break
-        }
-    }
-
-    if (role == null) {
-        return
-    }
+    val role: Role = getRole(roomContext, creeps) ?: return
 
     val finalPlan = creepPlans.first {it.role == role}
+    var body: Array<BodyPartConstant> = finalPlan.body.copyOf()
     val minimumCost = finalPlan.body.sumOf { BODYPART_COST[it]!! }
     val multiplicator = min(roomContext.room.energyCapacityAvailable / minimumCost, finalPlan.max)
     val finalCost = minimumCost * multiplicator
-    var body: Array<BodyPartConstant> = finalPlan.body.copyOf()
     if (finalPlan.role == Role.HARVESTER && creeps.count { it.memory.role == finalPlan.role } == 0 ) {
         val minMultiplicator = min(roomContext.room.energyAvailable / minimumCost, finalPlan.max)
         for (i in 1 until minMultiplicator) {
@@ -106,4 +91,20 @@ private fun spawnCreeps(roomContext: RoomContext) {
         ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { } // do nothing
         else -> console.log("unhandled error code $code")
     }
+}
+
+private fun getRole(roomContext: RoomContext, creeps: Array<Creep>): Role? {
+    var role: Role? = null
+    for (creepPlan in creepPlans) {
+        if (roomContext.room.energyAvailable < creepPlan.body.sumOf { BODYPART_COST[it]!! }) {
+            continue
+        }
+        val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
+        val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
+        if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
+            role = creepPlan.role
+            break
+        }
+    }
+    return role
 }
