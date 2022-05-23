@@ -39,11 +39,11 @@ fun StructureTower.rampartLimit() : Int {
     val controller = room.controller
     return controller?.let {
         when (it.level) {
-            1, 2, 3, 4 -> 100_000
-            5 -> 200_000
-            6 -> 300_000
-            7 -> 500_000
-            8 -> 1_000_000
+            1, 2, 3, 4 -> 500_000
+            5 -> 750_000
+            6 -> 1_000_000
+            7 -> 1_500_000
+            8 -> 3_000_000
             else -> 0
         }
     }  ?: 0

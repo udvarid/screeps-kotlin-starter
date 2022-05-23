@@ -83,7 +83,7 @@ private fun spawnCreeps(roomContext: RoomContext) {
 
     val newName = "${role.name}_${Game.time}"
     val code = roomContext.spawn!!.spawnCreep(body, newName, options {
-        memory = jsObject<CreepMemory> { this.role = this.role }
+        memory = jsObject<CreepMemory> { this.role = role }
     })
 
     when (code) {
