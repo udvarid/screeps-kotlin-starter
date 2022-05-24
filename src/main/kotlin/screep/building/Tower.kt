@@ -9,13 +9,17 @@ import screeps.api.structures.StructureTower
 
 fun StructureTower.doYourJobTower(roomContext: RoomContext) {
     if (room.memory.underAttack) {
-        val enemy = pos.findClosestByRange(FIND_HOSTILE_CREEPS)
-        if (enemy != null) {
-            attack(enemy)
+        val enemiesWithAttackingCapability = roomContext.enemyCreeps
+            .filter { it.getActiveBodyparts(ATTACK) > 0 || it.getActiveBodyparts(RANGED_ATTACK) > 0 }
+        if (enemiesWithAttackingCapability.isNotEmpty()) {
+            attack(pos.findClosestByRange(enemiesWithAttackingCapability.toTypedArray())!!)
         } else {
-            roomContext.damagedCreeps
-                .maxByOrNull { it.hitsMax - it.hits }
-                ?.let { heal(it) }
+            val damagedCreep = roomContext.damagedCreeps.maxByOrNull { it.hitsMax - it.hits }
+            if (damagedCreep != null) {
+                heal(damagedCreep)
+            } else {
+                pos.findClosestByRange(roomContext.enemyCreeps)?.let {attack(it)}
+            }
         }
     } else if (ableToRepair() && room.memory.hasDamagedBuilding) {
         roomContext.damagedBuildings
