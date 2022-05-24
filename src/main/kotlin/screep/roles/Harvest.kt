@@ -43,8 +43,8 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
 
 private fun getEnergyFillPriority(structureType: StructureConstant, room: Room): Int =
     when (structureType) {
-        STRUCTURE_TOWER -> if (room.memory.underAttack) 3 else 2
-        STRUCTURE_SPAWN, STRUCTURE_EXTENSION -> 2
+        STRUCTURE_TOWER -> if (room.memory.underAttack) 4 else 2
+        STRUCTURE_SPAWN, STRUCTURE_EXTENSION -> 3
         else -> 1
     }
 

@@ -47,6 +47,10 @@ private fun operateTowers(roomContexts: List<RoomContext>) {
 
 private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
     for (creep in Game.creeps.values) {
+        if (creep.shouldDie()) {
+            creep.suicide()
+            continue
+        }
         val roomContext = roomContexts.firstOrNull { it.room.name == creep.room.name }
         when (creep.memory.role) {
             Role.HARVESTER -> creep.harvestMe(roomContext)

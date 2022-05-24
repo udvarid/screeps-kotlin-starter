@@ -53,6 +53,7 @@ fun Creep.goWithdraw(store: StoreOwner) {
         moveTo(store.pos, options { reusePath = 10 })
     }
 }
+fun Creep.shouldDie(): Boolean = ticksToLive < 100 && store[RESOURCE_ENERGY] == 0
 
 val structuresRequiresEnergy : List<StructureConstant> =
     listOf(STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE)
@@ -75,8 +76,8 @@ fun logicForBuilder(roomContext: RoomContext) : Boolean =
     roomContext.room.getMyConstructionSites().isNotEmpty()
 
 val creepPlans = listOf(
-    CreepPlan(Role.HARVESTER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 5),
-    CreepPlan(Role.UPGRADER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 5),
-    CreepPlan(Role.BUILDER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 5, ::logicForBuilder),
-    CreepPlan(Role.REPAIRER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 5, ::logicForRepairer)
+    CreepPlan(Role.HARVESTER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
+    CreepPlan(Role.UPGRADER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
+    CreepPlan(Role.BUILDER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForBuilder),
+    CreepPlan(Role.REPAIRER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForRepairer)
 )

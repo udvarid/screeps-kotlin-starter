@@ -55,8 +55,20 @@ private fun detectingEnemies(roomContexts: List<RoomContext>) {
         val enemyScreeps = roomContext.enemyCreeps.count()
         roomContext.room.memory.underAttack = enemyScreeps > 0
         if (roomContext.room.memory.underAttack) {
+            safeModeInvestigation(roomContext)
             console.log("Room ", roomContext.room.name, " is under attack!")
         }
+    }
+}
+
+fun safeModeInvestigation(roomContext: RoomContext) {
+    val noFunctioningTower = roomContext.myTowers
+        .map { it.unsafeCast<StoreOwner>() }
+        .all { it.store[RESOURCE_ENERGY] == 0 }
+    val hasSafeModeToActivate =
+        roomContext.room.controller?.let {it.safeMode == null && it.safeModeAvailable > 0 && it.safeModeCooldown == null} ?: false
+    if (noFunctioningTower && hasSafeModeToActivate) {
+        roomContext.room.controller?.activateSafeMode()
     }
 }
 
