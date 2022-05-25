@@ -57,6 +57,7 @@ private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
             Role.BUILDER -> creep.buildMe(roomContext)
             Role.REPAIRER -> creep.repairMe(roomContext)
             Role.UPGRADER -> creep.upgradeMe(roomContext)
+            Role.HAULER -> creep.haulMe(roomContext)
             else -> creep.assignRole()
         }
     }
@@ -105,7 +106,7 @@ private fun getRole(roomContext: RoomContext, creeps: Array<Creep>): Role? {
             continue
         }
         val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
-        val extraLogic = creepPlan.logic?.let { it(roomContext, numberOfRelatedCreeps) } ?: true
+        val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
         if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
             role = creepPlan.role
             break

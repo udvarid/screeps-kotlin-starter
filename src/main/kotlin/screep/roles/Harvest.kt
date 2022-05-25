@@ -2,7 +2,6 @@ package screep.roles
 
 import screep.context.RoomContext
 import screep.memory.state
-import screep.memory.underAttack
 import screeps.api.*
 import screeps.api.structures.Structure
 
@@ -40,13 +39,5 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
         }
     }
 }
-
-private fun getEnergyFillPriority(structureType: StructureConstant, room: Room): Int =
-    when (structureType) {
-        STRUCTURE_TOWER -> if (room.memory.underAttack) 4 else 2
-        STRUCTURE_SPAWN, STRUCTURE_EXTENSION -> 3
-        else -> 1
-    }
-
 
 

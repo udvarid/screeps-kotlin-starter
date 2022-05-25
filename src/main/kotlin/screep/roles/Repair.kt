@@ -1,6 +1,5 @@
 package screep.roles
 
-import screep.building.getDamagedBuildings
 import screep.building.storageWithEnergy
 import screep.context.RoomContext
 import screep.memory.role
@@ -8,7 +7,7 @@ import screep.memory.state
 import screep.memory.working
 import screeps.api.*
 
-fun Creep.repairMe(roomContext: RoomContext?, assignedRoom: Room = this.room) {
+fun Creep.repairMe(roomContext: RoomContext?) {
     if (memory.working && store[RESOURCE_ENERGY] == 0) {
         memory.working = false
         say("🔄 harvest")
