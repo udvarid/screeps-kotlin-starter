@@ -32,6 +32,7 @@ var FlagMemory.test : Int by memory { 0 }
 /* room.memory */
 var RoomMemory.underAttack : Boolean by memory { false }
 var RoomMemory.hasDamagedBuilding : Boolean by memory { false }
+var RoomMemory.storeEnergySnapshot : Int by memory { 0 }
 
 /* spawn.memory */
 var SpawnMemory.test : Int by memory { 0 }
@@ -39,3 +40,4 @@ var SpawnMemory.test : Int by memory { 0 }
 /* global.memory */
 var GlobalMemory.inspectCounterOfEnemyDetecting : Int by memory { 0 }
 var GlobalMemory.inspectCounterOfBuilding : Int by memory { 0 }
+var GlobalMemory.inspectStoreEnergy : Int by memory { 0 }

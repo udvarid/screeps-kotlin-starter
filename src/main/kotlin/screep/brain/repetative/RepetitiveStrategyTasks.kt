@@ -4,11 +4,9 @@ package screep.brain.repetative
 import screep.building.BuildingConstructor
 import screep.constant.constructionRelatedLimit
 import screep.constant.enemyDetectorLimit
+import screep.constant.storeEnergySnapshotLimit
 import screep.context.RoomContext
-import screep.memory.hasDamagedBuilding
-import screep.memory.inspectCounterOfBuilding
-import screep.memory.inspectCounterOfEnemyDetecting
-import screep.memory.underAttack
+import screep.memory.*
 import screep.roles.structureNotToRepair
 import screeps.api.*
 import screeps.utils.isEmpty
@@ -21,9 +19,24 @@ class RepetitiveStrategyTasks {
             memoryClearing(Game.creeps)
             detectingEnemies(roomContexts)
             doConstructionRelatedJobs(roomContexts)
+            makeStoreEnergySnapshot(roomContexts)
         }
     }
 }
+
+private fun makeStoreEnergySnapshot(roomContexts: List<RoomContext>) {
+    if (global.Memory.inspectStoreEnergy > 0) {
+        global.Memory.inspectStoreEnergy--
+        return
+    }
+    global.Memory.inspectStoreEnergy = storeEnergySnapshotLimit
+
+    for (roomContext in roomContexts) {
+        roomContext.room.memory.storeEnergySnapshot =
+            roomContext.room.storage.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY] ?: 0
+    }
+}
+
 
 private fun doConstructionRelatedJobs(roomContexts: List<RoomContext>) {
 

@@ -63,27 +63,8 @@ private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
 }
 
 private fun spawnCreeps(roomContext: RoomContext) {
-    val creeps = roomContext.myCreeps
-
-    val role: Role = getRole(roomContext, creeps) ?: return
-
-    val finalPlan = creepPlans.first {it.role == role}
-    var body: Array<BodyPartConstant> = finalPlan.body.copyOf()
-    val minimumCost = finalPlan.body.sumOf { BODYPART_COST[it]!! }
-    val multiplicator = min(roomContext.room.energyCapacityAvailable / minimumCost, finalPlan.max)
-    val finalCost = minimumCost * multiplicator
-    if (finalPlan.role == Role.HARVESTER && creeps.count { it.memory.role == finalPlan.role } == 0 ) {
-        val minMultiplicator = min(roomContext.room.energyAvailable / minimumCost, finalPlan.max)
-        for (i in 1 until minMultiplicator) {
-            body += finalPlan.body
-        }
-    } else if (roomContext.room.energyAvailable < finalCost) {
-        return
-    } else {
-        for (i in 1 until multiplicator) {
-            body += finalPlan.body
-        }
-    }
+    val role: Role = getRole(roomContext, roomContext.myCreeps) ?: return
+    val body = getBody(creepPlans.first {it.role == role}, roomContext) ?: return
 
     val newName = "${role.name}_${Game.time}"
     val code = roomContext.spawn!!.spawnCreep(body, newName, options {
@@ -97,6 +78,26 @@ private fun spawnCreeps(roomContext: RoomContext) {
     }
 }
 
+private fun getBody(finalPlan: CreepPlan, roomContext: RoomContext): Array<BodyPartConstant>? {
+    var body: Array<BodyPartConstant> = finalPlan.body.copyOf()
+    val minimumCost = finalPlan.body.sumOf { BODYPART_COST[it]!! }
+    val multiplicator = min(roomContext.room.energyCapacityAvailable / minimumCost, finalPlan.max)
+    val finalCost = minimumCost * multiplicator
+    if (finalPlan.role == Role.HARVESTER && roomContext.myCreeps.count { it.memory.role == finalPlan.role } == 0 ) {
+        val minMultiplicator = min(roomContext.room.energyAvailable / minimumCost, finalPlan.max)
+        for (i in 1 until minMultiplicator) {
+            body += finalPlan.body
+        }
+    } else if (roomContext.room.energyAvailable < finalCost) {
+        return null
+    } else {
+        for (i in 1 until multiplicator) {
+            body += finalPlan.body
+        }
+    }
+    return body
+}
+
 private fun getRole(roomContext: RoomContext, creeps: Array<Creep>): Role? {
     var role: Role? = null
     for (creepPlan in creepPlans) {
@@ -104,7 +105,7 @@ private fun getRole(roomContext: RoomContext, creeps: Array<Creep>): Role? {
             continue
         }
         val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
-        val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
+        val extraLogic = creepPlan.logic?.let { it(roomContext, numberOfRelatedCreeps) } ?: true
         if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
             role = creepPlan.role
             break

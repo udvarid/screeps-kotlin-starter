@@ -1,10 +1,12 @@
 package screep.roles
 
 import screep.building.getMyConstructionSites
+import screep.constant.energySurplusLimitForSecondUpgrader
 import screep.context.RoomContext
 import screep.memory.hasDamagedBuilding
 import screeps.api.*
 import screep.memory.role
+import screep.memory.storeEnergySnapshot
 
 enum class Role {
     UNASSIGNED,
@@ -65,19 +67,26 @@ data class CreepPlan(
     val number: Int,
     val body: Array<BodyPartConstant>,
     val max: Int,
-    val logic: ((roomContext: RoomContext) -> Boolean)? = null
+    val logic: ((roomContext: RoomContext, numberOfExistingCreeps: Int) -> Boolean)? = null
 )
 
-fun logicForRepairer(roomContext: RoomContext) : Boolean =
+fun logicForRepairer(roomContext: RoomContext, numberOfExistingCreeps: Int) : Boolean =
     roomContext.room.memory.hasDamagedBuilding &&
             roomContext.myTowers.isEmpty()
 
-fun logicForBuilder(roomContext: RoomContext) : Boolean =
+fun logicForBuilder(roomContext: RoomContext, numberOfExistingCreeps: Int) : Boolean =
     roomContext.room.getMyConstructionSites().isNotEmpty()
+
+fun logicForUpgrader(roomContext: RoomContext, numberOfExistingCreeps: Int) : Boolean {
+    val storageEnergy = roomContext.room.storage.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY] ?: 0
+    return numberOfExistingCreeps == 0 ||
+            storageEnergy >= roomContext.room.memory.storeEnergySnapshot + energySurplusLimitForSecondUpgrader
+}
+
 
 val creepPlans = listOf(
     CreepPlan(Role.HARVESTER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
-    CreepPlan(Role.UPGRADER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
+    CreepPlan(Role.UPGRADER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForUpgrader),
     CreepPlan(Role.BUILDER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForBuilder),
     CreepPlan(Role.REPAIRER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForRepairer)
 )
