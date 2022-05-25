@@ -1,6 +1,7 @@
 package screep.roles
 
 import screep.building.getMyConstructionSites
+import screep.constant.creepSuicideLimit
 import screep.constant.energySurplusLimitForSecondUpgrader
 import screep.context.RoomContext
 import screep.memory.hasDamagedBuilding
@@ -57,7 +58,7 @@ fun Creep.goWithdraw(store: StoreOwner) {
         moveTo(store.pos, options { reusePath = 10 })
     }
 }
-fun Creep.shouldDie(): Boolean = ticksToLive < 100 && store[RESOURCE_ENERGY] == 0
+fun Creep.shouldDie(): Boolean = ticksToLive < creepSuicideLimit && store[RESOURCE_ENERGY] == 0
 
 val structuresRequiresEnergy : List<StructureConstant> =
     listOf(STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE)

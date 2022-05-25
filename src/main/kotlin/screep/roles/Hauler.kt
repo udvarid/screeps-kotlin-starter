@@ -1,6 +1,7 @@
 package screep.roles
 
 import screep.building.storageWithEnergy
+import screep.constant.creepSuicideLimit
 import screep.context.RoomContext
 import screep.memory.state
 import screeps.api.*
@@ -32,7 +33,15 @@ fun Creep.haulMe(roomContext: RoomContext?) {
             }
         }
     } else {
-        memory.state = CreepState.IDLE
+        if (store[RESOURCE_ENERGY] > 0 && ticksToLive < creepSuicideLimit) {
+            memory.state = CreepState.TRANSFERRING_ENERGY
+            val storage = roomContext.room.storage!!
+            if (transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                moveTo(storage.pos, options { reusePath = 10 })
+            }
+        } else {
+            memory.state = CreepState.IDLE
+        }
     }
 }
 
