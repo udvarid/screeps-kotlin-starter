@@ -107,7 +107,8 @@ private fun getRole(roomContext: RoomContext, creeps: Array<Creep>): Role? {
         }
         val numberOfRelatedCreeps = creeps.count { it.memory.role == creepPlan.role }
         val extraLogic = creepPlan.logic?.let { it(roomContext) } ?: true
-        if (numberOfRelatedCreeps < creepPlan.number && extraLogic) {
+        val numberPlan = if (extraLogic) creepPlan.extraNumber else creepPlan.number
+        if (numberOfRelatedCreeps < numberPlan && extraLogic) {
             role = creepPlan.role
             break
         }

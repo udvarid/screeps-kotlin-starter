@@ -109,8 +109,8 @@ private fun isSpawnEligibleForConstructing(roomContext: RoomContext): Boolean =
 
 private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<Pair<Int, Int>>> {
     val buildingLimits = mutableMapOf<BuildableStructureConstant, List<Pair<Int, Int>>>()
-    buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5), Pair(3,10), Pair(4, 20))
-    buildingLimits[STRUCTURE_TOWER] = listOf(Pair(3,1))
+    buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5), Pair(3,10), Pair(4, 20), Pair(5, 30))
+    buildingLimits[STRUCTURE_TOWER] = listOf(Pair(3,1), Pair(5, 2))
     buildingLimits[STRUCTURE_STORAGE] = listOf(Pair(4,1))
     return buildingLimits
 }

@@ -76,6 +76,7 @@ fun getEnergyFillPriority(structureType: StructureConstant, room: Room): Int =
 data class CreepPlan(
     val role: Role,
     val number: Int,
+    val extraNumber: Int,
     val body: Array<BodyPartConstant>,
     val max: Int,
     val logic: ((roomContext: RoomContext) -> Boolean)? = null
@@ -97,14 +98,15 @@ fun logicForUpgrader(roomContext: RoomContext) : Boolean {
     val numberOfExistingCreeps = roomContext.myCreeps.count { it.memory.role == Role.UPGRADER }
     val storageEnergy by lazy { roomContext.room.storage.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY] ?: 0 }
     return numberOfExistingCreeps == 0 ||
+            storageEnergy >= 500_000 ||
             storageEnergy >= roomContext.room.memory.storeEnergySnapshot + energySurplusLimitForSecondUpgrader
 }
 
 
 val creepPlans = listOf(
-    CreepPlan(Role.HARVESTER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
-    CreepPlan(Role.UPGRADER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForUpgrader),
-    CreepPlan(Role.BUILDER, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForBuilder),
-    CreepPlan(Role.REPAIRER, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForRepairer),
-    CreepPlan(Role.HAULER, 1, arrayOf(CARRY, MOVE), 10, ::logicForHauler)
+    CreepPlan(Role.HARVESTER, 2, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6),
+    CreepPlan(Role.UPGRADER, 1, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForUpgrader),
+    CreepPlan(Role.BUILDER, 2, 2, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForBuilder),
+    CreepPlan(Role.REPAIRER, 1, 1, arrayOf(WORK, CARRY, MOVE, MOVE), 6, ::logicForRepairer),
+    CreepPlan(Role.HAULER, 1, 1, arrayOf(CARRY, MOVE), 10, ::logicForHauler)
 )
