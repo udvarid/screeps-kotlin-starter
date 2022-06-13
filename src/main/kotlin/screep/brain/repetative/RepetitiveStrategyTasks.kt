@@ -51,6 +51,7 @@ private fun doConstructionRelatedJobs(roomContexts: List<RoomContext>) {
         with(roomContext.room) {
             memory.hasDamagedBuilding = roomContext.damagedBuildings
                 .filterNot { structureNotToRepair.contains(it.structureType) }
+                .filterNot { it.structureType == STRUCTURE_CONTAINER && it.hits > it.hitsMax * 0.9 }
                 .isNotEmpty()
         }
     }

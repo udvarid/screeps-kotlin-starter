@@ -15,6 +15,52 @@ class BuildingConstructor {
                 return
             }
             val controllerLevel = roomContext.room.controller!!.level
+            if (buildConsturctionSite(controllerLevel, roomContext)) {
+                return
+            } else if (buildRampart(roomContext)) {
+                return
+            } else (buildContainer(roomContext))
+        }
+
+        private fun buildContainer(roomContext: RoomContext) {
+            if (roomContext.myStructures.firstOrNull { it.structureType == STRUCTURE_STORAGE } == null) {
+                return
+            }
+            val sources = roomContext.mySources
+            for (source in sources) {
+                val containers = source.pos.findInRange(FIND_MY_STRUCTURES, 2)
+                    .filter { it.structureType == STRUCTURE_CONTAINER }
+                if (containers.size < 2) {
+                    putContainerConstructionSite(roomContext, source.pos, containers.size + 1)
+                }
+            }
+        }
+
+        private fun putContainerConstructionSite(roomContext: RoomContext, pos: RoomPosition, range: Int) {
+            val structures = roomContext.myStructures.map { Coordinate(it.pos) }
+            val terrain = roomContext.myTerrain
+            val position = Coordinate(pos).getFullNeighbours(range)
+                .asSequence()
+                .filter { it.inNormalRange()}
+                .filterNot { structures.contains(it) }
+                .filterNot { terrain[it.x, it.y] == TERRAIN_MASK_WALL }
+                .filterNot { terrain[it.x, it.y] == TERRAIN_MASK_LAVA }
+                .map { RoomPosition(it.x, it.y, roomContext.room.name) }
+                .minByOrNull { roomContext.room.findPath(it, pos).size}
+            position?.let { roomContext.room.createConstructionSite(it, STRUCTURE_CONTAINER) }
+        }
+
+        private fun buildRampart(roomContext: RoomContext): Boolean {
+            val structureNeedsRampart = roomContext.myStructuresToCoverWithRampart
+                .filterNot { it.hasRampart(roomContext.myRamparts) }
+                .firstOrNull()
+            return if (structureNeedsRampart != null) {
+                roomContext.room.createConstructionSite(structureNeedsRampart.pos, STRUCTURE_RAMPART)
+                true
+            } else false
+        }
+
+        private fun buildConsturctionSite(controllerLevel: Int, roomContext: RoomContext): Boolean {
             buildingWithLimits
                 .forEach { entry ->
                     val buildingType = entry.key
@@ -22,22 +68,17 @@ class BuildingConstructor {
                     val numberOfBuilding = if (listOfPairs.isNotEmpty()) listOfPairs[0].second else 0
 
                     if (roomContext.myStructures.count { it.structureType == buildingType } < numberOfBuilding) {
-                        createConstructionSite(roomContext, buildingType)
-                        return
+                        tryToCreateConstructionSite(roomContext, buildingType)
+                        return true
                     }
                 }
-            val structureNeedsRampart = roomContext.myStructuresToCoverWithRampart
-                .filterNot { it.hasRampart(roomContext.myRamparts) }
-                .firstOrNull()
-            structureNeedsRampart?.let {
-                roomContext.room.createConstructionSite(it.pos, STRUCTURE_RAMPART)
-            }
+            return false
         }
 
     }
 }
 
-private fun createConstructionSite(roomContext: RoomContext, buildingType: BuildableStructureConstant) {
+private fun tryToCreateConstructionSite(roomContext: RoomContext, buildingType: BuildableStructureConstant) {
     getFreeBuildingSite(roomContext)?.let {
         roomContext.room.createConstructionSite(it.x, it.y, buildingType)
     }
@@ -50,7 +91,7 @@ private fun getFreeBuildingSite(roomContext: RoomContext): Coordinate? {
     var finalCoordinate: Coordinate? = null
     while (finalCoordinate == null && coordinateQueue.isNotEmpty()) {
         val coordinate = coordinateQueue.removeAt(0)
-        coordinate.getNeighbours()
+        coordinate.getCornerNeighbours()
             .filter { it.inNormalRange()}
             .filterNot { it in coordinateQueue}
             .forEach { coordinateQueue.add(it) }
@@ -118,12 +159,25 @@ private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<P
 data class Coordinate(val x: Int, val y: Int) {
     constructor(pos: RoomPosition) : this(pos.x, pos.y)
 
-    fun getNeighbours(): List<Coordinate> = listOf(
+    fun getCornerNeighbours(): List<Coordinate> = listOf(
         Coordinate(x + 1, y + 1),
         Coordinate(x - 1, y - 1),
         Coordinate(x + 1, y - 1),
         Coordinate(x - 1, y + 1)
     )
+
+    fun getFullNeighbours(range: Int): List<Coordinate> {
+        val coordinates = mutableListOf<Coordinate>()
+        for (i in -range..range) {
+            for (j in -range..range) {
+                if (i != 0 || j != 0) {
+                    coordinates.add(Coordinate(i, j))
+                }
+            }
+        }
+        return coordinates
+    }
+
 
     fun inNormalRange() : Boolean =
         x in 1..48 && y in 1..49
