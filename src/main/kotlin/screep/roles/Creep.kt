@@ -61,12 +61,13 @@ fun Creep.goWithdraw(store: StoreOwner) {
 fun Creep.shouldDie(): Boolean = ticksToLive < creepSuicideLimit && store[RESOURCE_ENERGY] == 0
 
 val structuresRequiresEnergy : List<StructureConstant> =
-    listOf(STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE)
+    listOf(STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_CONTAINER)
 
 private fun Creep.canBeHarvester(): Boolean = getActiveBodyparts(WORK) > 0 && getActiveBodyparts(CARRY) > 0
 
 fun getEnergyFillPriority(structureType: StructureConstant, room: Room): Int =
     when (structureType) {
+        STRUCTURE_CONTAINER -> 5
         STRUCTURE_TOWER -> if (room.memory.underAttack) 4 else 2
         STRUCTURE_SPAWN, STRUCTURE_EXTENSION -> 3
         else -> 1

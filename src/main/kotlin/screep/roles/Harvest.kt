@@ -12,7 +12,8 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
         memory.state = CreepState.HARVESTING
         source?.let { goHarvest(it) }
     } else {
-        val target = roomContext!!.myStructures
+        val containersNearby = pos.findInRange(roomContext!!.containers, 2)
+        val target = (roomContext.myStructures + containersNearby)
             .filter { structuresRequiresEnergy.contains(it.structureType) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }

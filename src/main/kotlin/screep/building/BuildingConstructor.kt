@@ -28,7 +28,7 @@ class BuildingConstructor {
             }
             val sources = roomContext.mySources
             for (source in sources) {
-                val containers = source.pos.findInRange(FIND_MY_STRUCTURES, 2)
+                val containers = source.pos.findInRange(FIND_STRUCTURES, 2)
                     .filter { it.structureType == STRUCTURE_CONTAINER }
                 if (containers.size < 2) {
                     putContainerConstructionSite(roomContext, source.pos, containers.size + 1)
@@ -37,7 +37,7 @@ class BuildingConstructor {
         }
 
         private fun putContainerConstructionSite(roomContext: RoomContext, pos: RoomPosition, range: Int) {
-            val structures = roomContext.myStructures.map { Coordinate(it.pos) }
+            val structures = (roomContext.myStructures + roomContext.containers).map { Coordinate(it.pos) }
             val terrain = roomContext.myTerrain
             val position = Coordinate(pos).getFullNeighbours(range)
                 .asSequence()
@@ -46,7 +46,7 @@ class BuildingConstructor {
                 .filterNot { terrain[it.x, it.y] == TERRAIN_MASK_WALL }
                 .filterNot { terrain[it.x, it.y] == TERRAIN_MASK_LAVA }
                 .map { RoomPosition(it.x, it.y, roomContext.room.name) }
-                .minByOrNull { roomContext.room.findPath(it, pos).size}
+                .minByOrNull { roomContext.room.findPath(it, roomContext.room.storage!!.pos).size}
             position?.let { roomContext.room.createConstructionSite(it, STRUCTURE_CONTAINER) }
         }
 
@@ -171,7 +171,7 @@ data class Coordinate(val x: Int, val y: Int) {
         for (i in -range..range) {
             for (j in -range..range) {
                 if (i != 0 || j != 0) {
-                    coordinates.add(Coordinate(i, j))
+                    coordinates.add(Coordinate(x + i, y + j))
                 }
             }
         }

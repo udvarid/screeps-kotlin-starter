@@ -1,9 +1,6 @@
 package screep.context
 
-import screep.building.getDamagedBuildings
-import screep.building.getMyConstructionSites
-import screep.building.getMyStructures
-import screep.building.structureTypesToDefend
+import screep.building.*
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import screeps.utils.lazyPerTick
@@ -16,6 +13,7 @@ class RoomContext(val room: Room, val spawn: StructureSpawn? = null) {
     val damagedBuildings by lazyPerTick { room.getDamagedBuildings() }
     val myConstructionSites by lazyPerTick { room.getMyConstructionSites() }
     val myStructures by lazyPerTick { room.getMyStructures() }
+    val containers by lazyPerTick { room.getContainers() }
     val myRamparts by lazyPerTick { myStructures.filter { it.structureType == STRUCTURE_RAMPART } }
     val myExits by lazyPerTick { room.find(FIND_EXIT) }
     val myMinerals by lazyPerTick { room.find(FIND_MINERALS) }
