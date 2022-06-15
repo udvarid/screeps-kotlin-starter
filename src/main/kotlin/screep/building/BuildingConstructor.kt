@@ -23,14 +23,15 @@ class BuildingConstructor {
         }
 
         private fun buildContainer(roomContext: RoomContext) {
-            if (roomContext.myStructures.firstOrNull { it.structureType == STRUCTURE_STORAGE } == null) {
+            if (roomContext.myStructures.firstOrNull { it.structureType == STRUCTURE_STORAGE } == null ||
+                roomContext.room.controller?.level < 6) {
                 return
             }
             val sources = roomContext.mySources
             for (source in sources) {
                 val containers = source.pos.findInRange(FIND_STRUCTURES, 2)
                     .filter { it.structureType == STRUCTURE_CONTAINER }
-                if (containers.size < 2) {
+                if (containers.size < 1) {
                     putContainerConstructionSite(roomContext, source.pos, containers.size + 1)
                 }
             }
@@ -150,9 +151,10 @@ private fun isSpawnEligibleForConstructing(roomContext: RoomContext): Boolean =
 
 private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<Pair<Int, Int>>> {
     val buildingLimits = mutableMapOf<BuildableStructureConstant, List<Pair<Int, Int>>>()
-    buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5), Pair(3,10), Pair(4, 20), Pair(5, 30))
+    buildingLimits[STRUCTURE_EXTENSION] = listOf(Pair(2,5), Pair(3,10), Pair(4, 20), Pair(5, 30), Pair(6, 40))
     buildingLimits[STRUCTURE_TOWER] = listOf(Pair(3,1), Pair(5, 2))
     buildingLimits[STRUCTURE_STORAGE] = listOf(Pair(4,1))
+    buildingLimits[STRUCTURE_TERMINAL] = listOf(Pair(6,1))
     return buildingLimits
 }
 

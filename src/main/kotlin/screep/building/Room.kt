@@ -19,4 +19,5 @@ fun Room.storageWithEnergy(): StoreOwner? {
     }
 }
 
-val structureTypesToDefend = listOf(STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE)
+val structureTypesToDefend = listOf(STRUCTURE_SPAWN, STRUCTURE_TOWER,
+    STRUCTURE_STORAGE, STRUCTURE_TERMINAL, STRUCTURE_LINK)
