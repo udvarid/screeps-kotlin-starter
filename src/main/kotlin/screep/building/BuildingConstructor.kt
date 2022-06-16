@@ -19,25 +19,52 @@ class BuildingConstructor {
                 return
             } else if (buildRampart(roomContext)) {
                 return
-            } else (buildContainer(roomContext))
+            } else if (buildLinks(roomContext)) {
+                return
+            }
+            else (buildContainer(roomContext))
+        }
+
+        private fun buildLinks(roomContext: RoomContext): Boolean {
+            if (!isRoomReadyToContainerAndLink(roomContext)) return false
+            for (source in roomContext.mySources.map { it.pos }) {
+                if (linkConstructionCreating(source, roomContext)) return true
+            }
+            return linkConstructionCreating(roomContext.room.storage!!.pos, roomContext)
+        }
+
+        private fun linkConstructionCreating(pos: RoomPosition, roomContext: RoomContext): Boolean {
+            val links = pos.findInRange(FIND_MY_STRUCTURES, 2)
+                .filter { it.structureType == STRUCTURE_LINK }
+            if (links.isEmpty()) {
+                putConstructionSite(roomContext, pos, 2, STRUCTURE_LINK)
+                return true
+            }
+            return false
         }
 
         private fun buildContainer(roomContext: RoomContext) {
-            if (roomContext.myStructures.firstOrNull { it.structureType == STRUCTURE_STORAGE } == null ||
-                roomContext.room.controller?.level < 6) {
-                return
-            }
-            val sources = roomContext.mySources
+            if (!isRoomReadyToContainerAndLink(roomContext)) return
+            val sources = roomContext.mySources // itt majd a mineral source-ot is hozzátenni, és pos-á alakítani
             for (source in sources) {
                 val containers = source.pos.findInRange(FIND_STRUCTURES, 2)
                     .filter { it.structureType == STRUCTURE_CONTAINER }
-                if (containers.size < 1) {
-                    putContainerConstructionSite(roomContext, source.pos, containers.size + 1)
+                if (containers.size < 1) { // constans legyen
+                    putConstructionSite(roomContext, source.pos, containers.size + 1, STRUCTURE_CONTAINER) // konstans legyen
                 }
             }
         }
 
-        private fun putContainerConstructionSite(roomContext: RoomContext, pos: RoomPosition, range: Int) {
+        private fun isRoomReadyToContainerAndLink(roomContext: RoomContext): Boolean {
+            if (roomContext.myStructures.firstOrNull { it.structureType == STRUCTURE_STORAGE } == null ||
+                roomContext.room.controller?.level < 6) {
+                return false
+            }
+            return true
+        }
+
+        private fun putConstructionSite(roomContext: RoomContext, pos: RoomPosition, range: Int,
+                                        str: BuildableStructureConstant) {
             val structures = (roomContext.myStructures + roomContext.containers).map { Coordinate(it.pos) }
             val terrain = roomContext.myTerrain
             val position = Coordinate(pos).getFullNeighbours(range)
@@ -48,7 +75,7 @@ class BuildingConstructor {
                 .filterNot { terrain[it.x, it.y] == TERRAIN_MASK_LAVA }
                 .map { RoomPosition(it.x, it.y, roomContext.room.name) }
                 .minByOrNull { roomContext.room.findPath(it, roomContext.room.storage!!.pos).size}
-            position?.let { roomContext.room.createConstructionSite(it, STRUCTURE_CONTAINER) }
+            position?.let { roomContext.room.createConstructionSite(it, str) }
         }
 
         private fun buildRampart(roomContext: RoomContext): Boolean {
