@@ -8,6 +8,20 @@ import screeps.api.structures.Structure
 fun Creep.harvestMe(roomContext: RoomContext?) {
     if (store[RESOURCE_ENERGY] < store.getCapacity() && memory.state == CreepState.HARVESTING ||
         store[RESOURCE_ENERGY] == 0) {
+        if (memory.state != CreepState.HARVESTING) {
+            val containersNearbyWithEnergy = pos.findInRange(roomContext!!.containers, 3)
+                .map { it.unsafeCast<StoreOwner>() }
+                .filter { it.store[RESOURCE_ENERGY] > 0 }
+            val linkNearbyWithSpace = pos.findInRange(roomContext.myStructures, 3)
+                .filter { it.structureType == STRUCTURE_LINK }
+                .map { it.unsafeCast<StoreOwner>() }
+                .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
+            if (containersNearbyWithEnergy.isNotEmpty() && linkNearbyWithSpace.isNotEmpty()) {
+                val container = containersNearbyWithEnergy.first()
+                goWithdraw(container)
+                return
+            }
+        }
         val source = findFreeAndActiveSource(roomContext!!.mySources)
         memory.state = CreepState.HARVESTING
         source?.let { goHarvest(it) }
