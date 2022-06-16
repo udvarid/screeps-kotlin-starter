@@ -21,9 +21,16 @@ fun Creep.haulMe(roomContext: RoomContext?) {
 
     if (targets.isNotEmpty()) {
         if (store[RESOURCE_ENERGY] == 0) {
-            room.storageWithEnergy()?.let {
-                memory.state = CreepState.HARVESTING
-                goWithdraw(it)
+            val storage = room.storage
+            if (storage != null) {
+                val link = storage.pos.findInRange(FIND_MY_STRUCTURES, 1)
+                        .filter { it.structureType == STRUCTURE_LINK }
+                        .map { it.unsafeCast<StoreOwner>() }
+                        .firstOrNull { it.store[RESOURCE_ENERGY] > 0 }
+                val energySource = link ?: room.storageWithEnergy()
+                energySource?.let {
+                    memory.state = CreepState.HARVESTING
+                    goWithdraw(it) }
             }
         } else {
             val target = targets.first()
@@ -40,7 +47,19 @@ fun Creep.haulMe(roomContext: RoomContext?) {
                 moveTo(storage.pos, options { reusePath = 10 })
             }
         } else {
-            memory.state = CreepState.IDLE
+            val storage = room.storage
+            if (storage != null) {
+                val link = storage.pos.findInRange(FIND_MY_STRUCTURES, 1)
+                    .filter { it.structureType == STRUCTURE_LINK }
+                    .map { it.unsafeCast<StoreOwner>() }
+                    .firstOrNull { it.store[RESOURCE_ENERGY] > 0 }
+                if (link != null) {
+                    memory.state = CreepState.HARVESTING
+                    goWithdraw(link)
+                } else {
+                    memory.state = CreepState.IDLE
+                }
+            }
         }
     }
 }

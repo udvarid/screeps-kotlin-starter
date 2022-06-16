@@ -12,10 +12,15 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
             val containersNearbyWithEnergy = pos.findInRange(roomContext!!.containers, 3)
                 .map { it.unsafeCast<StoreOwner>() }
                 .filter { it.store[RESOURCE_ENERGY] > 0 }
+            val linkNearToStore = room.storage?.let {
+                it.pos.findInRange(FIND_MY_STRUCTURES, 1)
+                    .firstOrNull { link -> link.structureType == STRUCTURE_LINK }
+            }
             val linkNearbyWithSpace = pos.findInRange(roomContext.myStructures, 3)
                 .filter { it.structureType == STRUCTURE_LINK }
                 .map { it.unsafeCast<StoreOwner>() }
                 .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
+                .filter { it.id != linkNearToStore?.id}
             if (containersNearbyWithEnergy.isNotEmpty() && linkNearbyWithSpace.isNotEmpty()) {
                 val container = containersNearbyWithEnergy.first()
                 goWithdraw(container)
@@ -27,7 +32,8 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
         source?.let { goHarvest(it) }
     } else {
         val containersNearby = pos.findInRange(roomContext!!.containers, 2)
-        val target = (roomContext.myStructures + containersNearby)
+        val linksNearby = pos.findInRange(FIND_MY_STRUCTURES, 2).filter { it.structureType == STRUCTURE_LINK }
+        val target = (roomContext.myStructures + containersNearby + linksNearby)
             .filter { structuresRequiresEnergy.contains(it.structureType) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }

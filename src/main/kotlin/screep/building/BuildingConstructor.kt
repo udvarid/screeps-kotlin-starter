@@ -28,16 +28,16 @@ class BuildingConstructor {
         private fun buildLinks(roomContext: RoomContext): Boolean {
             if (!isRoomReadyToContainerAndLink(roomContext)) return false
             for (source in roomContext.mySources.map { it.pos }) {
-                if (linkConstructionCreating(source, roomContext)) return true
+                if (linkConstructionCreating(source, roomContext, 2)) return true
             }
-            return linkConstructionCreating(roomContext.room.storage!!.pos, roomContext)
+            return linkConstructionCreating(roomContext.room.storage!!.pos, roomContext, 1)
         }
 
-        private fun linkConstructionCreating(pos: RoomPosition, roomContext: RoomContext): Boolean {
-            val links = pos.findInRange(FIND_MY_STRUCTURES, 2)
+        private fun linkConstructionCreating(pos: RoomPosition, roomContext: RoomContext, range: Int): Boolean {
+            val links = pos.findInRange(FIND_MY_STRUCTURES, range)
                 .filter { it.structureType == STRUCTURE_LINK }
             if (links.isEmpty()) {
-                putConstructionSite(roomContext, pos, 2, STRUCTURE_LINK)
+                putConstructionSite(roomContext, pos, range, STRUCTURE_LINK)
                 return true
             }
             return false
