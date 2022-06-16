@@ -6,6 +6,7 @@ import screep.context.RoomContext
 import screep.memory.role
 import screep.roles.*
 import screeps.api.*
+import screeps.api.structures.StructureLink
 import screeps.api.structures.StructureTower
 import screeps.utils.unsafe.jsObject
 import kotlin.math.min
@@ -16,12 +17,33 @@ class RepetitiveOperationTasks {
         fun doTasks(roomContexts: List<RoomContext>) {
             operateTowers(roomContexts)
             for (roomContext in roomContexts) {
-                if (!screepWasReorganised(roomContext))
+                operateLinks(roomContext)
+                if (!screepWasReorganised(roomContext)) {
                     spawnCreeps(roomContext)
+                }
             }
             giveWorkToCreeps(roomContexts)
         }
 
+    }
+}
+private fun operateLinks(roomContext: RoomContext) {
+    val store = roomContext.room.storage
+    val links = roomContext.myStructures
+        .filter { it.structureType == STRUCTURE_LINK }
+        .map { it.unsafeCast<StructureLink>() }
+    if (store != null && links.size >= 2) {
+        val centralLink = store.pos.findInRange(FIND_MY_STRUCTURES, 1)
+            .map { it.unsafeCast<StructureLink>() }
+            .firstOrNull { it.structureType == STRUCTURE_LINK }
+        val sourceLinks = links.filterNot { it.id == centralLink?.id }
+        if (sourceLinks.size == links.size - 1 && links.map { it.id }.contains(centralLink?.id)) {
+            if (centralLink!!.cooldown == 0 && centralLink.store[RESOURCE_ENERGY] == 0) {
+                sourceLinks
+                    .filter { it.cooldown == 0 }
+                    .firstOrNull { it.store[RESOURCE_ENERGY] > 0 }?.transferEnergy(centralLink)
+            }
+        }
     }
 }
 
