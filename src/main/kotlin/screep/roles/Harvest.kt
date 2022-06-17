@@ -32,14 +32,15 @@ fun Creep.harvestMe(roomContext: RoomContext?) {
         source?.let { goHarvest(it) }
     } else {
         val containersNearby = pos.findInRange(roomContext!!.containers, 2)
-        val linksNearby = pos.findInRange(FIND_MY_STRUCTURES, 2).filter { it.structureType == STRUCTURE_LINK }
-        val target = (roomContext.myStructures + containersNearby + linksNearby)
+        val linksNearby = pos.findInRange(FIND_MY_STRUCTURES, 3).filter { it.structureType == STRUCTURE_LINK }
+        val target = (roomContext.myStructures + containersNearby)
             .filter { structuresRequiresEnergy.contains(it.structureType) }
+            .filterNot { it.structureType == STRUCTURE_LINK && !linksNearby.map { l -> l.id }.contains(it.id) }
             .map { it.unsafeCast<StoreOwner>() }
             .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
             .map { it.unsafeCast<Structure>() }
             .map { Pair(getEnergyFillPriority(it.structureType, room), it) }
-            .sortedByDescending { it.first }
+            .sortedByDescending { it.first * 100 + (100 - pos.findPathTo(it.second).size) }
             .map { it.second }
             .map { it.unsafeCast<StoreOwner>() }
             .firstOrNull()

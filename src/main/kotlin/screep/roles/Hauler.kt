@@ -10,14 +10,17 @@ import screeps.api.structures.Structure
 fun Creep.haulMe(roomContext: RoomContext?) {
     val targets = roomContext!!.myStructures
         .filter { structuresRequiresEnergy.contains(it.structureType) }
-        .filterNot { it.structureType == STRUCTURE_STORAGE }
-        .map { it.unsafeCast<StoreOwner>() }
-        .filter { it.store[RESOURCE_ENERGY] < it.store.getCapacity(RESOURCE_ENERGY) }
-        .map { it.unsafeCast<Structure>() }
+        .map { Pair(it, it.unsafeCast<StoreOwner>()) }
+        .filterNot { it.first.structureType == STRUCTURE_STORAGE }
+        .filterNot { it.first.structureType == STRUCTURE_LINK }
+        .filter { it.second.store[RESOURCE_ENERGY] < it.second.store.getCapacity(RESOURCE_ENERGY) }
+        .filterNot { towerNotToBeFilled(it) }
+        .map { it.first }
         .map { Pair(getEnergyFillPriority(it.structureType, room), it) }
         .sortedByDescending { it.first }
         .map { it.second }
         .map { it.unsafeCast<StoreOwner>() }
+        .sortedByDescending { it.store[RESOURCE_ENERGY]?.div(it.store.getCapacity(RESOURCE_ENERGY)!!) }
 
     if (targets.isNotEmpty()) {
         if (store[RESOURCE_ENERGY] == 0) {
@@ -40,7 +43,7 @@ fun Creep.haulMe(roomContext: RoomContext?) {
             }
         }
     } else {
-        if (store[RESOURCE_ENERGY] > 0 && ticksToLive < creepSuicideLimit) {
+        if (store[RESOURCE_ENERGY] > 0) {
             memory.state = CreepState.TRANSFERRING_ENERGY
             val storage = roomContext.room.storage!!
             if (transfer(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -58,9 +61,14 @@ fun Creep.haulMe(roomContext: RoomContext?) {
                     goWithdraw(link)
                 } else {
                     memory.state = CreepState.IDLE
+                    moveTo(roomContext.spawn!!, options { reusePath = 10 })
                 }
             }
         }
     }
 }
+
+fun towerNotToBeFilled(it: Pair<Structure, StoreOwner>): Boolean =
+    it.first.structureType == STRUCTURE_TOWER &&
+            it.second.store[RESOURCE_ENERGY]!! > it.second.store.getCapacity(RESOURCE_ENERGY)?.times(0.8)!!
 
