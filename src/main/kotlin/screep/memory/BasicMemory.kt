@@ -42,3 +42,6 @@ var GlobalMemory.inspectCounterOfEnemyDetecting : Int by memory { 0 }
 var GlobalMemory.inspectCounterOfBuilding : Int by memory { 0 }
 var GlobalMemory.inspectStoreEnergy : Int by memory { 0 }
 var GlobalMemory.doTerminalJob : Int by memory { 0 }
+var GlobalMemory.prices : List<PriceHistory> by memory { emptyList() }
+
+data class PriceHistory(val type: ResourceConstant, val price: Float, val stdDevPrice: Float)
