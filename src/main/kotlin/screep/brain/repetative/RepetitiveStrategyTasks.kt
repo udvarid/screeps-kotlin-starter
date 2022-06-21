@@ -5,10 +5,12 @@ import screep.building.BuildingConstructor
 import screep.constant.constructionRelatedLimit
 import screep.constant.enemyDetectorLimit
 import screep.constant.storeEnergySnapshotLimit
+import screep.constant.terminalRelatedLimit
 import screep.context.RoomContext
 import screep.memory.*
 import screep.roles.structureNotToRepair
 import screeps.api.*
+import screeps.api.structures.StructureTerminal
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
 
@@ -20,9 +22,54 @@ class RepetitiveStrategyTasks {
             detectingEnemies(roomContexts)
             doConstructionRelatedJobs(roomContexts)
             makeStoreEnergySnapshot(roomContexts)
+            //doTerminalJobs(roomContexts)
+        }
+
+    }
+}
+
+private fun doTerminalJobs(roomContexts: List<RoomContext>) {
+    if (global.Memory.doTerminalJob > 0) {
+        global.Memory.doTerminalJob--
+        return
+    }
+    global.Memory.inspectStoreEnergy = terminalRelatedLimit
+
+    // leszedni memóriába az aktuális árakat (egy tömbbe) ill. a std. dev-et (getHistory-val)
+
+
+    for (roomContext in roomContexts) {
+        val terminal = roomContext.myStructures
+            .filter { it.structureType == STRUCTURE_TERMINAL}
+            .map { it.unsafeCast<StructureTerminal>() }
+            .firstOrNull()
+        terminal?.let {
+            //terminálban szereplő nyersanyagonként végigmenni
+            //energia esetén
+                //ha nincs aktív eladásunk,
+                    //ha a store több, mint a limit, akkor piaci ár felett betenni
+                    //ha a store kisebb, mint az alsó limit, akkor legolcsóbbat megvenni
+                        //ha van más terminálunk, aki árul, akkor függetlenül az ártól, tőle megvenni?
+                //ha van aktív eladásunk és már X ideje nem tudjuk eladni, akkor zárjuk
+            console.log("we have a terminal in room ", roomContext.room.name)
+//            val orders = Game.market.getAllOrders()
+//                .asSequence()
+//                .filter { it.resourceType == RESOURCE_ENERGY }
+//                .filter { it.type == ORDER_SELL }
+//                .toList()
+//            console.log("we have some orders.. ", orders.size)
+//            for (order in orders) {
+//                console.log(order.amount, order.price)
+//            }
+            val history = Game.market.getHistory(RESOURCE_ENERGY)
+            for (element in history) {
+                console.log(element.date, element.avgPrice, element.volume, element.stddevPrice)
+            }
+
         }
     }
 }
+
 
 private fun makeStoreEnergySnapshot(roomContexts: List<RoomContext>) {
     if (global.Memory.inspectStoreEnergy > 0) {

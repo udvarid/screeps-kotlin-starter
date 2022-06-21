@@ -41,3 +41,4 @@ var SpawnMemory.test : Int by memory { 0 }
 var GlobalMemory.inspectCounterOfEnemyDetecting : Int by memory { 0 }
 var GlobalMemory.inspectCounterOfBuilding : Int by memory { 0 }
 var GlobalMemory.inspectStoreEnergy : Int by memory { 0 }
+var GlobalMemory.doTerminalJob : Int by memory { 0 }

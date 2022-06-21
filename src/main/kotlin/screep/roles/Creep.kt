@@ -53,8 +53,9 @@ fun Creep.goHarvest(source: Source) {
     }
 }
 
-fun Creep.goWithdraw(store: StoreOwner) {
-    if (withdraw(store, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+fun Creep.goWithdraw(store: StoreOwner, amount: Int? = null) {
+    val response = if (amount == null) withdraw(store, RESOURCE_ENERGY) else withdraw(store, RESOURCE_ENERGY, amount)
+    if (response == ERR_NOT_IN_RANGE) {
         moveTo(store.pos, options { reusePath = 10 })
     }
 }

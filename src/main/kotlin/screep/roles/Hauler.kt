@@ -2,6 +2,8 @@ package screep.roles
 
 import screep.building.storageWithEnergy
 import screep.constant.creepSuicideLimit
+import screep.constant.storeToTerminalEnergyLimit
+import screep.constant.terminalEnergyLimit
 import screep.context.RoomContext
 import screep.memory.state
 import screeps.api.*
@@ -9,12 +11,13 @@ import screeps.api.structures.Structure
 
 fun Creep.haulMe(roomContext: RoomContext?) {
     val targets = roomContext!!.myStructures
-        .filter { structuresRequiresEnergy.contains(it.structureType) }
+        .filter { structuresRequiresEnergy.contains(it.structureType) || it.structureType == STRUCTURE_TERMINAL }
         .map { Pair(it, it.unsafeCast<StoreOwner>()) }
         .filterNot { it.first.structureType == STRUCTURE_STORAGE }
         .filterNot { it.first.structureType == STRUCTURE_LINK }
         .filter { it.second.store[RESOURCE_ENERGY] < it.second.store.getCapacity(RESOURCE_ENERGY) }
         .filterNot { towerNotToBeFilled(it) }
+        .filterNot { terminalNotToBeFilled(it, roomContext) }
         .map { it.first }
         .map { Pair(getEnergyFillPriority(it.structureType, room), it) }
         .sortedByDescending { it.first }
@@ -59,13 +62,30 @@ fun Creep.haulMe(roomContext: RoomContext?) {
                 if (link != null) {
                     memory.state = CreepState.HARVESTING
                     goWithdraw(link)
-                } else {
-                    memory.state = CreepState.IDLE
-                    moveTo(roomContext.spawn!!, options { reusePath = 10 })
+                    return
                 }
             }
+            val terminal = roomContext.myStructures
+                .filter { it.structureType == STRUCTURE_TERMINAL }
+                .map { it.unsafeCast<StoreOwner>() }
+                .firstOrNull { it.store[RESOURCE_ENERGY] > terminalEnergyLimit }
+            if (terminal != null) {
+                memory.state = CreepState.HARVESTING
+                val surplus = terminal.store[RESOURCE_ENERGY]?.minus(terminalEnergyLimit)
+                goWithdraw(terminal, surplus)
+                return
+            }
+            memory.state = CreepState.IDLE
+            moveTo(roomContext.spawn!!, options { reusePath = 10 })
         }
     }
+}
+
+fun terminalNotToBeFilled(it: Pair<Structure, StoreOwner>, roomContext: RoomContext): Boolean {
+    val storageEnergy = roomContext.room.storage.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY] ?: 0
+    return it.first.structureType == STRUCTURE_TERMINAL &&
+            (it.second.store[RESOURCE_ENERGY] >= terminalEnergyLimit ||
+                    storageEnergy <= storeToTerminalEnergyLimit)
 }
 
 fun towerNotToBeFilled(it: Pair<Structure, StoreOwner>): Boolean =
