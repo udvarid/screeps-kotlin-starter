@@ -32,7 +32,7 @@ private fun doTerminalJobs(roomContexts: List<RoomContext>) {
         global.Memory.doTerminalJob--
         return
     }
-    global.Memory.inspectStoreEnergy = terminalRelatedLimit
+    global.Memory.doTerminalJob = terminalRelatedLimit
 
     Game.market.getHistory(RESOURCE_ENERGY).last().let {
         global.Memory.prices = listOf(PriceHistory(it.resourceType, it.avgPrice, it.stddevPrice))
