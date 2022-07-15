@@ -65,8 +65,7 @@ fun Creep.haulMe(roomContext: RoomContext?) {
                     return
                 }
             }
-            val terminal = roomContext.myStructures
-                .filter { it.structureType == STRUCTURE_TERMINAL }
+            val terminal = roomContext.myTerminal
                 .map { it.unsafeCast<StoreOwner>() }
                 .firstOrNull { it.store[RESOURCE_ENERGY] > terminalEnergyLimit }
             if (terminal != null) {

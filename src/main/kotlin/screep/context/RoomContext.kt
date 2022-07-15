@@ -15,6 +15,7 @@ class RoomContext(val room: Room, val spawn: StructureSpawn? = null) {
     val myStructures by lazyPerTick { room.getMyStructures() }
     val containers by lazyPerTick { room.getContainers() }
     val myRamparts by lazyPerTick { myStructures.filter { it.structureType == STRUCTURE_RAMPART } }
+    val myTerminal by lazyPerTick { myStructures.filter { it.structureType == STRUCTURE_TERMINAL } }
     val myExits by lazyPerTick { room.find(FIND_EXIT) }
     val myMinerals by lazyPerTick { room.find(FIND_MINERALS) }
     val mySources by lazyPerTick { room.find(FIND_SOURCES) }
