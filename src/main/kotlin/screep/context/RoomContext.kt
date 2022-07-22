@@ -20,6 +20,7 @@ class RoomContext(val room: Room, val spawn: StructureSpawn? = null) {
     val myMinerals by lazyPerTick { room.find(FIND_MINERALS) }
     val mySources by lazyPerTick { room.find(FIND_SOURCES) }
     val myTerrain by lazyPerTick { room.getTerrain() }
+    val mySpawns by lazyPerTick { myStructures.filter { it.structureType == STRUCTURE_SPAWN }.map { it.unsafeCast<StructureSpawn>() } }
     val myTowers by lazyPerTick { myStructures.filter { it.structureType == STRUCTURE_TOWER } }
     val myStructuresToCoverWithRampart by lazyPerTick {
         myStructures.filter { structureTypesToDefend.contains(it.structureType) }

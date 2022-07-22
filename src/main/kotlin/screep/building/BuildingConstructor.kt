@@ -182,6 +182,7 @@ private fun fillUpBuildingLiWithLimits(): Map<BuildableStructureConstant, List<P
     buildingLimits[STRUCTURE_TOWER] = listOf(Pair(3,1), Pair(5, 2), Pair(7, 3), Pair(8, 6))
     buildingLimits[STRUCTURE_STORAGE] = listOf(Pair(4,1))
     buildingLimits[STRUCTURE_TERMINAL] = listOf(Pair(6,1))
+    buildingLimits[STRUCTURE_SPAWN] = listOf(Pair(1,1), Pair(7,2))
     return buildingLimits
 }
 

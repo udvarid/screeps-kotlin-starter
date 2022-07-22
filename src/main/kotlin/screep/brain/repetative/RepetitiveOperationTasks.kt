@@ -92,18 +92,22 @@ private fun giveWorkToCreeps(roomContexts: List<RoomContext>) {
 }
 
 private fun spawnCreeps(roomContext: RoomContext) {
-    val role: Role = getRole(roomContext, roomContext.myCreeps) ?: return
-    val body = getBody(creepPlans.first {it.role == role}, roomContext) ?: return
+    val freeSpawn = roomContext.mySpawns.firstOrNull{ it.spawning?.remainingTime == null}
+    freeSpawn?.let {
+        val role: Role = getRole(roomContext, roomContext.myCreeps) ?: return
+        val body = getBody(creepPlans.first { it.role == role }, roomContext) ?: return
+        console.log("Found spawn to spawn")
 
-    val newName = "${role.name}_${Game.time}"
-    val code = roomContext.spawn!!.spawnCreep(body, newName, options {
-        memory = jsObject<CreepMemory> { this.role = role }
-    })
+        val newName = "${role.name}_${Game.time}"
+        val code = it.spawnCreep(body, newName, options {
+            memory = jsObject<CreepMemory> { this.role = role }
+        })
 
-    when (code) {
-        OK -> console.log("spawning $newName with body $body")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { } // do nothing
-        else -> console.log("unhandled error code $code")
+        when (code) {
+            OK -> console.log("spawning $newName with body $body")
+            ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { } // do nothing
+            else -> console.log("unhandled error code $code")
+        }
     }
 }
 
