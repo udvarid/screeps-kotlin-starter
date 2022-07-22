@@ -35,7 +35,7 @@ class TerminalManager {
                     .firstOrNull()
 
                 terminal?.let {
-                    if (hasSufficientEnergyToSell(roomContext)) {
+                    if (hasSufficientEnergyToSell(roomContext) && hasEnoughEnergyInTerminal(it)) {
                         cancelMyOrders(myOrders, ORDER_BUY)
                         if (hasNoSuchOrders(myOrders, ORDER_SELL)) {
                             createOrder(price, roomContext, ORDER_SELL)
@@ -55,6 +55,9 @@ class TerminalManager {
                 }
             }
         }
+
+        private fun hasEnoughEnergyInTerminal(terminal: StructureTerminal): Boolean =
+            terminal.store.getCapacity(RESOURCE_ENERGY) >= marketOrderSize
 
         private fun hasNoSuchOrders(myOrders: List<JsPair<String, Market.Order>>, orderConstant: OrderConstant) =
             myOrders.none { it.component2().type == orderConstant && it.component2().resourceType == RESOURCE_ENERGY }
