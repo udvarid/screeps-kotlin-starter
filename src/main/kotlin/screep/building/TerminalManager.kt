@@ -57,7 +57,7 @@ class TerminalManager {
         }
 
         private fun hasEnoughEnergyInTerminal(terminal: StructureTerminal): Boolean =
-            terminal.store.getCapacity(RESOURCE_ENERGY) >= marketOrderSize
+            terminal.store[RESOURCE_ENERGY] >= marketOrderSize
 
         private fun hasNoSuchOrders(myOrders: List<JsPair<String, Market.Order>>, orderConstant: OrderConstant) =
             myOrders.none { it.component2().type == orderConstant && it.component2().resourceType == RESOURCE_ENERGY }
